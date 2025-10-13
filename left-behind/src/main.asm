@@ -18,16 +18,15 @@
 SECTION "Entry point", ROM0[$150]
 
 main::
-   ld     a,$19   ;; A = 0x19
-   ld    b, $15   ;; B = 0x15
-   ld [$9800],a   ;; [$9800] = A
-   ld  hl,$9801   ;; hl = $9801
-   ld   [hl], b   ;; *(hl) = 9801
-
-   ld     a,$14  
-   ld [$9802],a
-
-
+   ;; N en la esquina
+   ld a,$01
+   ld [$9A12],a
+   ld a,$02
+   ld [$9A13],a
+   ld a,$0D
+   ld [$9A32],a
+   ld a,$0E
+   ld [$9A33],a
 
    di     ;; Disable Interrupts
    halt   ;; Halt the CPU (stop procesing here)
