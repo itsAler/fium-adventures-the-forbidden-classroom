@@ -15,6 +15,11 @@
 ;; ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                         ;;
 ;;-------------------------------------------------------------------------------------------------------------------------------;;
 
+;; INCLUDE "hardware.inc"
+
+SECTION "Data", WRAM0[$c000]  
+tile: DS 2
+
 
 SECTION "Entry point", ROM0[$150]
 
@@ -30,19 +35,47 @@ SECTION "Entry point", ROM0[$150]
 
 main::
 
+   ; Espera varias veces a VBLANK
 
+   ; Vamos a esperar 2 segundos. vblank sucede 60 veces por segundo. Esperar 120 veces a vblank equivale a que pasen 2 seg
+
+   ld b,0
+wait2sec:
+   call waitvb
+   inc b
+   ld a,b
+   cp 120
+   jr nz,wait2sec
+
+
+   ; Haz un borrado en persiana
+
+   ; Ir rellenando poco a poco las 32 filas
+   ; y acto seguido, hacer lo contrario
+
+   ld e,0
+   ld hl, $9800 ; primera fila
+   ld a,  $09   ; Cargar tile en memoria
+   ld [tile], a
+rellenar_persiana: ; for(e=0,e<32,e++) 
+   call waitvb
+   
+   ld a,[tile]
+   ld b,a
+   call fillRow
+
+   ld a, $20 ; Salto de fila
+   add [hl]
+
+   inc e
+   ld a,e
+   cp 32
+   jr nz, rellenar_persiana
+
+     
    ; Borrar el logo de nintendo, espera a VBLANK
 
    call waitvb
-
-   ld a, $04
-   ld [$9944], a ;; Esto para comprobar que no borra ninguna fila de más :')
-
-   ld b,  $04
-   ld hl, $9800
-   call fillRow
-   ld hl, $9A00
-   call fillRow
 
    ld hl, $9904      ;; hl = Primera posicion a borrar logo
    ld b, 0           ;; b = tile 0
@@ -67,7 +100,11 @@ clearfor:            ;; for(a=0,a<10,a++) *hl=b hl++
 
    ; Rellenar una fila con un tile
 
-   call waitvb
+   ; call waitvb
+
+   ld b,  $04
+   ld hl, $9A00
+   call fillRow
 
 
 
@@ -76,6 +113,7 @@ clearfor:            ;; for(a=0,a<10,a++) *hl=b hl++
 
 
 ; waitVblank -- Espera hasta VBLANK
+; Manipula: a
 waitvb:           
    ld a,[$FF44]
    cp 144
