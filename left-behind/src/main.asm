@@ -15,28 +15,51 @@
 ;; ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                         ;;
 ;;-------------------------------------------------------------------------------------------------------------------------------;;
 
-;; Zona en WRAM escribible
-SECTION "Data", WRAM0[$c000]  
-   var: ds 2 ; Variable de 1 byte reservada
 
 SECTION "Entry point", ROM0[$150]
 
+; LVL 1
+; Borrar el logo de nintendo, espera a VBLANK
+; Rellenar una fila con un tile
+; Recuadra el logo de nintendo
+; LVL 2
+; Espera varias veces a VBLANK
+; Haz un borrado en persiana
+; LVL 3
+; Inventa una animación de borrado
+
 main::
 
-waitvb:
-   ld a,[$FF44]   ; A = rLY (registro del display que indica la línea en la que está escribiendo)
-                  ; rLY 000-143 : Escribiendo, no podemos escribir a VRAM
-                  ; rLY 144-153 : VBLANK, Vertical Blank, tiempo en el que la pantalla está ociosa y podemos
-                  ; escribir en VRAM
+;; WAITVBLANK
+waitvb: ; VBLANK: 144-153
+   ld a,[$FF44]
 
-   cp 144 ; a - 144, no modifica el registro, solo activa flags
-   jr nz, waitvb ; jump if flag Z != 0
+   cp 144
+   jr nz, waitvb ; VBLANK IF >144
+;;ENDWAITBLANK  
 
-   ld a, $00
-   ;ld [$], a
-   ;ld [$]
+   ld a, $04
+   ld [$9944], a ;; Esto para comprobar que no borra ninguna fila de más :')
 
-   
+   ld hl, $9904      ;; hl = Primera posicion a borrar logo
+   ld b, 0           ;; b = tile 0
+
+   ld c, 0
+do2row:              ;; borrar dos filas for(c=0,c<1,c++)
+   ld a, 0
+clearfor:            ;; for(a=0,a<10,a++) *hl=b hl++
+   ld [hl],b
+   inc hl
+   inc a
+   cp $10
+   jr nz, clearfor
+
+   ld hl, $9924  ; next row 
+
+   inc c
+   ld a,c
+   cp $2
+   jr nz, do2row
 
    di     ;; Disable Interrupts
    halt   ;; Halt the CPU (stop procesing here)
