@@ -32,11 +32,31 @@ waitvb:
    cp 144 ; a - 144, no modifica el registro, solo activa flags
    jr nz, waitvb ; jump if flag Z != 0
 
-   ld a, $00
-   ;ld [$], a
-   ;ld [$]
+   ;; Muchos trademark porque somos nintendo
+   ld    a, $19
+   ld    hl, $9860
+   ld    [hl+], a
+   ld    [hl+], a
+   ld    [hl+], a
+   ld    [hl+], a
+   ld    [hl+], a
+   ld    [hl+], a
+   ld    [hl+], a
+   ld    [hl+], a
+   ld    [hl+], a
 
-   
+   ;; N en la esquina
+   ld    hl, $9A12
+   ld    a, 1
+   ld    [hl+], a
+   ld    [hl], 2
+
+   ld    de, $1F ; Salto de línea y -1 tile (20-1)
+
+   add hl, de
+   ld a,$0D
+   ld [hl+],a
+   ld [hl],$0E
 
    di     ;; Disable Interrupts
    halt   ;; Halt the CPU (stop procesing here)
