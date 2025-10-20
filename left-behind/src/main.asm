@@ -19,6 +19,7 @@
 
 SECTION "Data", WRAM0[$c000]  
 tile: DS 2
+velocidad_persiana: DS 2 ; Velocidad de la animación de borrado en persiana.
 
 
 SECTION "Entry point", ROM0[$150]
@@ -34,6 +35,12 @@ SECTION "Entry point", ROM0[$150]
 ; Inventa una animación de borrado
 
 main::
+   ; Rellenar en ram las variables
+   ld a,  $09
+   ld [tile], a
+   ld a,  60
+   ld [velocidad_persiana], a
+
 
    ; Espera varias veces a VBLANK
 
@@ -57,55 +64,98 @@ wait2sec:
 
    ld e,0
    ld hl, $9800 ; primera fila
-   ld a,  $09   ; Cargar tile en memoria
-   ld [tile], a
-rellenar_persiana: ; for(e=0,e<32,e++) 
-   call waitvb
+   
+rellenar_persiana: ; for(e=0,e<17,e++) 
+   ld a, [velocidad_persiana]
+   call waitNvb
    
    ld a,[tile]
    ld b,a   
-   ld c, l     ; almacenar temporalmente la direccion de la fila [h|l*]
-
+   push hl  ; Almacenar temporalmente hl
    call fillRow
+   pop hl
 
-   ld l,c ; cargar inicio de la fila en hl 2c 2b
-   ld bc, $20 ; Salto de fila
+   ld bc, $20 ; Salto de fila Hcerlo con r16 nos permite evitar overflow con r8
    add hl, bc
 
    
    ld b,$05 ; Añadir decoración en la fila final
-   ld c, l
+   push hl 
    call fillRow
+   pop hl
          
    inc e
    ld a,e
-   cp 18 ;; 18 tiles de alto
+   cp 17 ;; 18 tiles de alto - 1 porque ya escribimos la siguiente fila
    jr nz, rellenar_persiana
 
    ;; ANIMACIÓN DE APERTURA
 
+   ld e, 0        
    ld hl, $9A20 ; Última fila
-vaciar_persiana:
-   call waitvb
+abrir_persiana: ; for(e=0,e<17;e++) fila[13-e] = $0
+   ld a,[velocidad_persiana]
+   call waitNvb
 
-
-   ld b, $0    ; Vaciar la fila
+   ld b, $00
+   push hl
    call fillRow
+   pop hl
+
+   ld a,l            ; hl = Fila anterior
+   sub a,$20
+   ld l,a
+   jr nc, nocarry
+   ; resta con underflow
+   ld a,h
+   sub a,1
+   ld h,a
+nocarry: ; resta normal
+
+   ld b,$05 ; Añadir decoración en la fila final
+   push hl 
+   call fillRow
+   pop hl
    
-
-
-
+   inc e
+   ld a,e
+   cp 18
+   jr nz, abrir_persiana
+  
    di     ;; Disable Interrupts
    halt   ;; Halt the CPU (stop procesing here)
 
 
+         ;;;;;;;;;;;;;;;;;;;
+         ;;; SUBRUTINAS ;;;;
+         ;;;;;;;;;;;;;;;;;;;
+
 ; waitVblank -- Espera hasta VBLANK
-; Manipula: a
 waitvb:           
    ld a,[$FF44]
    cp 144
    jr nz, waitvb
    ret 
+
+; waitNtimesVb -- Espera N veces VBLANK
+; 
+; Input:
+; a -- Número de veces a esperar a vblank
+;
+; Output:
+; Nada
+;
+waitNvb:
+.ffor: ;for(a=n,a>0,a--)
+   push af
+   call waitvb
+   pop af
+
+   dec a
+   cp 0
+   jr nz, .ffor
+
+   ret
 
 ; fillRow -- Rellena una fila de la pantalla visible
 ; 
@@ -115,8 +165,6 @@ waitvb:
 ;
 ; Output:
 ; Nada
-;
-; Manipula: hl,b,a
 fillRow:
 
    ld a,0
