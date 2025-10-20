@@ -52,16 +52,67 @@ CopyTilemap:
     or a, c
     jp nz, CopyTilemap
 
-    ; Encender pantalla y renderizado del background
-    ld a, LCDCF_BGON | LCDCF_ON
+    
+
+    ; Copiar tile del paddle
+    ld de, Paddle
+    ld hl, $8000
+    ld bc, PaddleEnd - Paddle
+CopyPaddle:
+    ld a, [de]
+    ld [hli], a
+    inc de
+    dec bc
+    ld a, b
+    or a, c
+    jp nz, CopyPaddle
+
+    ; Limpiamos la zona de memoria ram para objetos OAM
+    ; También debe hacerse con la pantalla apagada para acceder
+    ; de manera segura a la zona OAM.
+    ; Un objeto se almacena en 4 Bytes, que contienen la posY (storedY-16), posX(storedX-8), tileId y atributos.
+    ; OAM tiene un tamaño de 160B, por lo que 160/4 = 40 objetos.
+    ld a, 0
+    ld b, 160
+    ld hl, _OAMRAM
+
+ClearOam:
+    ld [hli], a
+    dec b
+    jp nz, ClearOam
+
+    ld hl, _OAMRAM
+    ld a, 128 + 16  ; X 
+    ld [hli], a
+    ld a, 16 + 8    ; Y
+    ld [hli], a
+    ld a, 0
+    ld [hli], a     ; TileID 0
+    ld [hli], a     ; Attributes 0
+
+    ; Encender pantalla, renderizado del background y de objects
+    ld a, LCDCF_BGON | LCDCF_ON | LCDCF_OBJON
     ld [rLCDC], a
 
     ; Modificamos el BackGround Palette: paleta de los 4 colores del bg
     ld a, %11100100
     ld [rBGP], a
+    ; Inicializar un Object Palette para los colores de los objetos, OBP0
+    ld a, %11100100
+    ld [rOBP0], a
+    
 
-Done:
-    jp Done
+Main:
+    ; Esperar a vBlank
+    call waitvb
+    ; Otra vez
+    call waitvb
+
+    ; Mover el paddle hacia la derecha
+    ld a, [_OAMRAM + 1]
+    inc a
+    ld [_OAMRAM + 1], a
+    jp Main
 
 Tiles:
 	dw `33333333
@@ -154,7 +205,7 @@ Tiles:
 	dw `23232323
 	dw `33333333
 
-    	dw `22222222
+    dw `22222222
 	dw `22222222
 	dw `22222222
 	dw `22222222
@@ -321,6 +372,18 @@ Tilemap:
 	db $04, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $08, $07, $03, $16, $17, $18, $19, $03, 0,0,0,0,0,0,0,0,0,0,0,0
 	db $04, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $09, $07, $03, $03, $03, $03, $03, $03, 0,0,0,0,0,0,0,0,0,0,0,0
 TilemapEnd:
+
+Paddle:
+    dw `13333331
+    dw `30000003
+    dw `13333331
+    dw `00000000
+    dw `00000000
+    dw `00000000
+    dw `00000000
+    dw `00000000
+PaddleEnd:
+
 
     
 
