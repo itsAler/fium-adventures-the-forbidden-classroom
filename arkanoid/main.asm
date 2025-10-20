@@ -29,43 +29,21 @@ EntryPoint:
     ld de, Tiles
     ld hl, $9000
     ld bc, TilesEnd - Tiles
-CopyTiles:
-    ld a,[de]
-    ld [hli], a
-    inc de
-    dec bc
-    ld a, b ; Forma entelegente de comparar si un r16 es 0.
-    or a, c ; Comparar con or sus r8 y el resultado indica si hay algún 1 (número!=0 -> z=0 -> nz)
-    jp nz, CopyTiles
+    call Memcopy
 
 
     ; Copiar tilemap 
     ld de, Tilemap
     ld hl, $9800
     ld bc, TilemapEnd - Tilemap
-CopyTilemap:
-    ld a, [de]
-    ld [hli], a
-    inc de
-    dec bc
-    ld a, b
-    or a, c
-    jp nz, CopyTilemap
+    call Memcopy
 
-    
 
     ; Copiar tile del paddle
     ld de, Paddle
     ld hl, $8000
     ld bc, PaddleEnd - Paddle
-CopyPaddle:
-    ld a, [de]
-    ld [hli], a
-    inc de
-    dec bc
-    ld a, b
-    or a, c
-    jp nz, CopyPaddle
+    call Memcopy
 
     ; Limpiamos la zona de memoria ram para objetos OAM
     ; También debe hacerse con la pantalla apagada para acceder
@@ -433,7 +411,20 @@ waitNvb:
    jr nz, .ffor
 
    ret
-
+    
+   ; Copia bytes de un área a otra
+   ; @param de: Origen
+   ; @param hl: Destino
+   ; @param bc: Longitud de los datos
+Memcopy:
+    ld a, [de]
+    ld [hli], a
+    inc de
+    dec bc
+    ld a, b ; Forma entelegente de comparar si un r16 es 0.
+    or a, c ; Comparar con or sus r8 y el resultado indica si hay algún 1 (número!=0 -> z=0 -> nz)
+    jp nz, Memcopy
+    ret 
 
 SECTION "Counter", WRAM0
 wFrameCounter: db
