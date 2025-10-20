@@ -101,6 +101,9 @@ ClearOam:
     ld a, %11100100
     ld [rOBP0], a
     
+    ; Inicializar la variable
+    ld a, 0
+    ld [wFrameCounter], a
 
 Main:
     ; Esperar a vBlank
@@ -108,10 +111,23 @@ Main:
     ; Otra vez
     call waitvb
 
+    ; Esperar 15 frames 
+    ld a, [wFrameCounter]
+    inc a
+    ld [wFrameCounter], a
+    cp a, 15
+    jp nz, Main
+
+    ; Resetear contador
+    ld a, 0 ; wFrameCounter = 0
+    ld [wFrameCounter], a
+
     ; Mover el paddle hacia la derecha
     ld a, [_OAMRAM + 1]
     inc a
     ld [_OAMRAM + 1], a
+
+
     jp Main
 
 Tiles:
@@ -417,4 +433,8 @@ waitNvb:
    jr nz, .ffor
 
    ret
+
+
+SECTION "Counter", WRAM0
+wFrameCounter: db
 
