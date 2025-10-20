@@ -50,7 +50,9 @@ wait2sec:
 
    ; Haz un borrado en persiana
 
-   ; Ir rellenando poco a poco las 32 filas
+   ;; ANIMACIÓN DE CERRADO
+
+   ; Ir rellenando poco a poco las 14 filas
    ; y acto seguido, hacer lo contrario
 
    ld e,0
@@ -61,50 +63,35 @@ rellenar_persiana: ; for(e=0,e<32,e++)
    call waitvb
    
    ld a,[tile]
-   ld b,a
+   ld b,a   
+   ld c, l     ; almacenar temporalmente la direccion de la fila [h|l*]
+
    call fillRow
 
-   ld a, $20 ; Salto de fila
-   add [hl]
+   ld l,c ; cargar inicio de la fila en hl 2c 2b
+   ld bc, $20 ; Salto de fila
+   add hl, bc
 
+   
+   ld b,$05 ; Añadir decoración en la fila final
+   ld c, l
+   call fillRow
+         
    inc e
    ld a,e
-   cp 32
+   cp 18 ;; 18 tiles de alto
    jr nz, rellenar_persiana
 
-     
-   ; Borrar el logo de nintendo, espera a VBLANK
+   ;; ANIMACIÓN DE APERTURA
 
+   ld hl, $9A20 ; Última fila
+vaciar_persiana:
    call waitvb
 
-   ld hl, $9904      ;; hl = Primera posicion a borrar logo
-   ld b, 0           ;; b = tile 0
 
-   ld c, 0
-do2row:              ;; borrar dos filas for(c=0,c<1,c++)
-   ld a, 0
-clearfor:            ;; for(a=0,a<10,a++) *hl=b hl++
-   ld [hl],b      ;; 2c 1b
-   inc l          ;; 1c 1b ->  6c 5b
-   inc a          ;; 1c 1b
-   cp $10         ;; 2c 2b
-   jr nz, clearfor
-
-   ld hl, $9924  ; next row 
-
-   inc c
-   ld a,c
-   cp $2
-   jr nz, do2row
-
-
-   ; Rellenar una fila con un tile
-
-   ; call waitvb
-
-   ld b,  $04
-   ld hl, $9A00
+   ld b, $0    ; Vaciar la fila
    call fillRow
+   
 
 
 
@@ -133,20 +120,20 @@ waitvb:
 fillRow:
 
    ld a,0
-.ffor:            ;; for(a=0,a<10,a++) *hl=b hl++
+.ffor:            ;; for(a=0,a<18,a++) *hl=b hl++
    /* IMPLEMENTACIÓN CON HLI, MÁS LENTA
    ld [hl+],a  ; 2c 1b
    inc b       ; 1c 1b
    ld c,a      ; 2c 2b -> 11c 10b
    ld a,b      ; 2c 2b
-   cp $20      ; 2c 2b
+   cp $14      ; 2c 2b
    ld a,c      ; 2c 2b
    jr nz, .ffor
    */
    ld [hl],b      ;; 2c 1b
    inc l          ;; 1c 1b ->  6c 5b
    inc a          ;; 1c 1b
-   cp $20         ;; 2c 2b
+   cp 20         ;; 2c 2b (20 tiles de largo)
    jr nz, .ffor
 
    ret
