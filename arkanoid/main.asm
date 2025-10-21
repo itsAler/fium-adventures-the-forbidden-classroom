@@ -79,9 +79,11 @@ ClearOam:
     ld a, %11100100
     ld [rOBP0], a
     
-    ; Inicializar la variable
+    ; Inicializar las variables
     ld a, 0
     ld [wFrameCounter], a
+    ld [wCurKeys], a
+    ld [wNewKeys], a
 
 Main:
     ; Esperar a vBlank
@@ -89,21 +91,38 @@ Main:
     ; Otra vez
     call waitvb
 
-    ; Esperar 15 frames 
-    ld a, [wFrameCounter]
-    inc a
-    ld [wFrameCounter], a
+    ; Comprobar el input por cada frame
+    call UpdateKeys
+
+    ; Comprobar dpad izq.
+CheckLeft:
+    ld a, [wCurKeys]
+    and a, PADF_LEFT ; etq que nos da directamente los bits de la máscara de inputs de la izq.
+    jp z, CheckRight
+Left:
+    ; Move the paddle one pixel to the left.
+    ld a, [_OAMRAM + 1]
+    dec a
+    ; If we've already hit the edge of the playfield, don't move.
     cp a, 15
-    jp nz, Main
+    jp z, Main
+    ld [_OAMRAM + 1], a
+    jp Main
 
-    ; Resetear contador
-    ld a, 0 ; wFrameCounter = 0
-    ld [wFrameCounter], a
-
-    ; Mover el paddle hacia la derecha
+; Then check the right button.
+CheckRight:
+    ld a, [wCurKeys]
+    and a, PADF_RIGHT
+    jp z, Main
+Right:
+    ; Move the paddle one pixel to the right.
     ld a, [_OAMRAM + 1]
     inc a
+    ; If we've already hit the edge of the playfield, don't move.
+    cp a, 105
+    jp z, Main
     ld [_OAMRAM + 1], a
+
 
 
     jp Main
@@ -466,4 +485,8 @@ UpdateKeys:
 
 SECTION "Counter", WRAM0
 wFrameCounter: db
+
+SECTION "Input", WRAM0
+wCurKeys: db
+wNewKeys: db
 
