@@ -45,6 +45,13 @@ EntryPoint:
     ld bc, PaddleEnd - Paddle
     call Memcopy
 
+	; Copiar tile de la pelota
+    ld de, Ball
+    ld hl, $8010
+    ld bc, BallEnd - Ball
+    call Memcopy
+
+
     ; Limpiamos la zona de memoria ram para objetos OAM
     ; También debe hacerse con la pantalla apagada para acceder
     ; de manera segura a la zona OAM.
@@ -59,14 +66,36 @@ ClearOam:
     dec b
     jp nz, ClearOam
 
+	; Inicializar OAM para el paddle
+	; ESTRUCTURA OAM -> [Y][X][TileIdx][Attributes: (b7:Priority)(b6:yFlip)(b5:xFlip)(b4:DMGPallete)(b3:Bank)(b2-0:CGBPallete)]
+
     ld hl, _OAMRAM
-    ld a, 128 + 16  ; X 
+    ld a, 128 + 16  ; Y 
     ld [hli], a
-    ld a, 16 + 8    ; Y
+    ld a, 16 + 8    ; X
     ld [hli], a
     ld a, 0
     ld [hli], a     ; TileID 0
     ld [hli], a     ; Attributes 0
+
+	; Inicializar OAM para la pelota
+    ld a, 100 + 16 
+    ld [hli], a
+    ld a, 32 + 8
+    ld [hli], a
+    ld a, 1 
+    ld [hli], a
+    ld a, 0
+    ld [hli], a
+
+	 ; La pelota se inicializa moviéndose hacia arriba y hacia la derecha
+	 ; (posiciones de memoria decrecientes para Y+ y crecientes para X+)
+    ld a, 1
+    ld [wBallMomentumX], a
+    ld a, -1
+    ld [wBallMomentumY], a
+
+
 
     ; Encender pantalla, renderizado del background y de objects
     ld a, LCDCF_BGON | LCDCF_ON | LCDCF_OBJON
@@ -88,8 +117,112 @@ ClearOam:
 Main:
     ; Esperar a vBlank
     call waitvb
-    ; Otra vez
     call waitvb
+
+	; Mover la pelota, para lo cual añadir el momento guardado en OAM
+	; ball.OAM.X += wBallMomentumX
+    ld a, [wBallMomentumX] 		
+    ld b, a
+    ld a, [_OAMRAM + 5]			
+    add a, b
+    ld [_OAMRAM + 5], a			
+	; ball.OAM.y += wBallMomentumY
+    ld a, [wBallMomentumY]
+    ld b, a
+    ld a, [_OAMRAM + 4]
+    add a, b
+    ld [_OAMRAM + 4], a
+
+	; Comprobar colisiones de la pelota
+
+BounceOnTop:
+    ; Remember to offset the OAM position!
+    ; (8, 16) in OAM coordinates is (0, 0) on the screen.
+	; if isWallTile(getTileByPixel(ball.OAM.y - 1, ball.OAM.x)) then wBallMomentumY++
+    ld a, [_OAMRAM + 4] 
+	sub a, 16 + 1				
+    ld c, a						
+    ld a, [_OAMRAM + 5]         
+    sub a, 8
+    ld b, a						
+    call GetTileByPixel 		
+    ld a, [hl]					
+    call IsWallTile				
+    jp nz, BounceOnRight
+    ld a, 1
+    ld [wBallMomentumY], a
+	
+BounceOnRight:
+	; if isWallTile(getTileByPixel(ball.OAM.y, ball.OAM.x + 1)) then wBallMomentumX--
+    ld a, [_OAMRAM + 4]
+    sub a, 16
+    ld c, a
+    ld a, [_OAMRAM + 5]
+    sub a, 8 - 1
+    ld b, a
+    call GetTileByPixel
+    ld a, [hl]
+    call IsWallTile
+    jp nz, BounceOnLeft
+    ld a, -1
+    ld [wBallMomentumX], a
+
+BounceOnLeft:
+	; if isWallTile(getTileByPixel(ball.OAM.y, ball.OAM.x - 1)) then wBallMomentumX++
+    ld a, [_OAMRAM + 4]
+    sub a, 16
+    ld c, a
+    ld a, [_OAMRAM + 5]
+    sub a, 8 + 1
+    ld b, a
+    call GetTileByPixel
+    ld a, [hl]
+    call IsWallTile
+    jp nz, BounceOnBottom
+    ld a, 1
+    ld [wBallMomentumX], a
+
+BounceOnBottom:
+	; if isWallTile(getTileByPixel(ball.OAM.y + 1, ball.OAM.x)) then wBallMomentumY--
+    ld a, [_OAMRAM + 4]
+    sub a, 16 - 1
+    ld c, a
+    ld a, [_OAMRAM + 5]
+    sub a, 8
+    ld b, a
+    call GetTileByPixel
+    ld a, [hl]
+    call IsWallTile
+    jp nz, BounceDone
+    ld a, -1
+    ld [wBallMomentumY], a
+BounceDone:
+
+	; Comprobar colisión con el paddle
+	; First, check if the ball is low enough to bounce off the paddle.
+	; if paddle.OAM.y == ball.OAM.y then comprobarColisionEjeX()
+    ld a, [_OAMRAM]
+    ld b, a
+    ld a, [_OAMRAM + 4]
+    cp a, b
+    jp nz, PaddleBounceDone ; If the ball isn't at the same Y position as the paddle, it can't bounce.
+
+    ; comprobarColisionEjeX()
+	;
+    ld a, [_OAMRAM + 5] ; Ball's X position.
+    ld b, a
+    ld a, [_OAMRAM + 1] ; Paddle's X position.
+    sub a, 8			; Esto se explica guay con el dibujo de la web: 
+    cp a, b
+    jp nc, PaddleBounceDone
+    add a, 8 + 16 ; 8 to undo, 16 as the width.
+    cp a, b
+    jp c, PaddleBounceDone
+
+    ld a, -1
+    ld [wBallMomentumY], a
+
+PaddleBounceDone:
 
     ; Comprobar el input por cada frame
     call UpdateKeys
@@ -397,6 +530,18 @@ Paddle:
     dw `00000000
 PaddleEnd:
 
+Ball:
+    dw `00033000
+    dw `00322300
+    dw `03222230
+    dw `03222230
+    dw `00322300
+    dw `00033000
+    dw `00000000
+    dw `00000000
+BallEnd:
+
+
 
     
 
@@ -483,10 +628,67 @@ UpdateKeys:
     ret
 
 
+; Convert a pixel position to a tilemap address
+; hl = $9800 + X + Y * 32
+; @param b: X
+; @param c: Y
+; @return hl: tile address
+GetTileByPixel:
+    ; First, we need to divide by 8 to convert a pixel position to a tile position.
+    ; After this we want to multiply the Y position by 32.
+    ; These operations effectively cancel out so we only need to mask the Y value.
+    ld a, c
+    and a, %11111000
+    ld l, a
+    ld h, 0
+    ; Now we have the position * 8 in hl
+    add hl, hl ; position * 16
+    add hl, hl ; position * 32
+    ; Convert the X position to an offset.
+    ld a, b
+    srl a ; a / 2
+    srl a ; a / 4
+    srl a ; a / 8
+    ; Add the two offsets together.
+    add a, l
+    ld l, a
+    adc a, h
+    sub a, l
+    ld h, a
+    ; Add the offset to the tilemap's base address, and we are done!
+    ld bc, $9800
+    add hl, bc
+    ret
+
+; @param a: tile ID
+; @return z: set if a is a wall.
+IsWallTile:
+    cp a, $00 		; if a == 0; flag.z = 1 
+    ret z			; ret solo si está activo el flag, si no, prosigue con la lista de tiles a comprobar.
+    cp a, $01
+    ret z
+    cp a, $02
+    ret z
+    cp a, $04
+    ret z
+    cp a, $05
+    ret z
+    cp a, $06
+    ret z
+    cp a, $07
+    ret
+
+
+
 SECTION "Counter", WRAM0
 wFrameCounter: db
 
 SECTION "Input", WRAM0
 wCurKeys: db
 wNewKeys: db
+
+SECTION "Ball Data", WRAM0
+wBallMomentumX: db
+wBallMomentumY: db
+
 
