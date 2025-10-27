@@ -129,6 +129,17 @@ Main:
     ; Esperar a vBlank
     call waitvb
     call waitvb
+    
+    /*
+    ; Mover el fondo (por probar)
+    ld a, [rSCY] ; En el eje Y hacia abajo
+    inc a
+    ld [rSCY], a
+
+    ld a, [rSCX] ; X
+    inc a
+    ld [rSCX], a
+    */
 
 	; Mover la pelota, para lo cual añadir el momento guardado en OAM
 	; ball.OAM.X += wBallMomentumX
