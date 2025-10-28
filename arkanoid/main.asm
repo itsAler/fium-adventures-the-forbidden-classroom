@@ -13,8 +13,8 @@ DEF SCORE_UNIT   EQU $9871 ;
 SECTION "Header", ROM0[$100]
 
     jp EntryPoint
-
-    ds $150 - @, 0
+    ; ds [memoria a reservar], [valor al que inicializarla]
+    ds $150 - @, 0 ; El primer parámetro es una expresión arbitraria de rgbds que significa "$150 menos la dirección de memoria actual"
 
 EntryPoint:
     /*
@@ -27,7 +27,7 @@ EntryPoint:
         Tan grave puede llegar a ser este asunto, 
         que la propia nintendo pasaba un control
         de calidad a los videojuegos a publicar
-        y no lo hacían si esto no se cumplía.
+        y no lo hacía si esto no se cumplía.
     */
 
     call waitNvb
@@ -70,7 +70,6 @@ EntryPoint:
     ld a, 0
     ld b, 160
     ld hl, _OAMRAM
-
 ClearOam:
     ld [hli], a
     dec b
