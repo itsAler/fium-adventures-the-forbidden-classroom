@@ -30,7 +30,10 @@ También va a ser necesario idear el videojuego a desarrollar cuando se controle
 
 - El juego
 - [ ] Elegir la temática del juego. -> Detectivesco tipo LA Noire con movimiento por un mapa libre tipo pokemon. Quizás combates.
+- [ ] Juego tipo Isaac con mazmorras generadas proceduralmente.
 - [ ] Elegir el estilo del juego.
 - [ ] Obtener tiles del juego.
+
+
 
  
