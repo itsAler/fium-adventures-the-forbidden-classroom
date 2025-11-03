@@ -29,10 +29,27 @@ También va a ser necesario idear el videojuego a desarrollar cuando se controle
     - [ ] Diálogos.
 
 - El juego
-- [ ] Elegir la temática del juego. -> Detectivesco tipo LA Noire con movimiento por un mapa libre tipo pokemon. Quizás combates.
-- [ ] Juego tipo Isaac con mazmorras generadas proceduralmente.
+- [ ] Juego tipo Isaac con mazmorras generadas proceduralmente / estilo mapa mundo abierto como minecraft.
 - [ ] Elegir el estilo del juego.
 - [ ] Obtener tiles del juego.
+
+
+Pinceladas sobre la generación de terreno con ruido:
+https://www.redblobgames.com/maps/terrain-from-noise/
+
+1. Generar un heigthmap
+
+2. Generar un mapa de árboles/piedras. -> Esto sinceramente pueden ser puntos aleatorios en los que se genera un árbol con x probabilidad si no hay otro arbol en un radio Y. -> Puede usarse perlin noise, pero hay métodos más eficientes. Hay que abordar el problema de si la forma del árbol va a ser aleatoria o fija, y cómo calcular las hojas con una función para no tener que almacenarlo en ram.
+
+Lo que si es destacable es la posibilidad de hacer que el tile de las hojas pueda superponerse al personaje, pero que siga habiendo colisiones en el caso
+de que las hojas tapen una diferencia de altura, por ejemplo. -> Dos tiles para el mismo sprite de hoja, pero que uno bloquee el movimiento y el otro no, y al general el arbol usamos el que bloquea si antes había un tile que bloquea y viceversa.
+
+3. Mapa con rios? -> A partir de cierta altura generar agua y arena si eso y ya.
+
+4. Mirar lo del subtile movement del zelda.
+
+5. Optimizar la generación del mapa -> Generar todo el mapa de una y guardarlo en la memoria ram (ya que en la rom no se puede) parece algo impensable o limitado a un mapa pequeño. La alternativa que se me ocurre es 
+que conforme se mueva el personaje, se genere el mapa en dicha dirección, en base a una funcion noise(x,y) para la altura, árboles, agua... -> El orden de dicha generación es importante ya que podríamos ahorrarnos tiempo de cálculo (si el agua la calculamos en base a si altura < x entonces podemos ahorrarnos comprobar si ahí va un árbol...).
 
 
 

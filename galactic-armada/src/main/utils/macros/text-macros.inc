@@ -1,5 +1,8 @@
 ; ANCHOR: charmap
 ; The character map for the text-font 
+; Permite codificar texto rápidamente.
+; RGBDS cambia el símbolo alfanumérico
+; por la posición de su tile en VRAM.
 CHARMAP " ", 0
 CHARMAP ".", 24
 CHARMAP "-", 25
