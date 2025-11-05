@@ -37,7 +37,9 @@ También va a ser necesario idear el videojuego a desarrollar cuando se controle
 Pinceladas sobre la generación de terreno con ruido:
 https://www.redblobgames.com/maps/terrain-from-noise/
 
-1. Generar un heigthmap
+1. Crear una función de generación de ruido -> perlin -> simplex es su evolución y requiere menos multiplicaciones, puede ser interesante de cara a las limitaciones técnicas de la consola.
+
+1. Generar un heightmap
 
 2. Generar un mapa de árboles/piedras. -> Esto sinceramente pueden ser puntos aleatorios en los que se genera un árbol con x probabilidad si no hay otro arbol en un radio Y. -> Puede usarse perlin noise, pero hay métodos más eficientes. Hay que abordar el problema de si la forma del árbol va a ser aleatoria o fija, y cómo calcular las hojas con una función para no tener que almacenarlo en ram.
 
