@@ -21,7 +21,6 @@ EntryPoint:
 	; Shut down audio circuitry
 	xor a
 	ld [rNR52], a
-	; We don't actually need another xor a here, because the value of A doesn't change between these two instructions
 	ld [wGameState], a
 
 	; Wait for the vertical blank phase before initiating the library
@@ -30,7 +29,7 @@ EntryPoint:
 	; from: https://github.com/eievui5/gb-sprobj-lib
 	; The library is relatively simple to get set up. First, put the following in your initialization code:
 	; Initilize Sprite Object Library.
-	;call InitSprObjLibWrapper
+	call InitSprObjLibWrapper
 
 	; Turn the LCD off
 	xor a
