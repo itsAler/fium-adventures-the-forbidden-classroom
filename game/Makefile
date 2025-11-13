@@ -1,10 +1,10 @@
 # You can set the name of the .gb ROM file here
-PROJECTNAME    	= GalacticArmada
+PROJECTNAME    	= gamename
 SRCDIR      	= src
 LIBDIR      	= libs
 OBJDIR      	= obj
 DSTDIR      	= dist
-RESDIR      	= $(SRCDIR)/resources
+RESDIR      	= assets
 ASMDIR          = $(SRCDIR)/main
 RESSPRITES      = $(RESDIR)/sprites
 RESBACKGROUNDS  = $(RESDIR)/backgrounds
@@ -12,6 +12,7 @@ GENDIR	    	= $(SRCDIR)/generated
 GENSPRITES	    = $(GENDIR)/sprites
 GENBACKGROUNDS	= $(GENDIR)/backgrounds
 BINS	    	= $(DSTDIR)/$(PROJECTNAME).gb
+NORMALIZEDBG := $(GENBACKGROUNDS)/$%_normalized.png
 
 # Tools
 RGBDS ?=
@@ -19,6 +20,7 @@ ASM := $(RGBDS)rgbasm
 GFX := $(RGBDS)rgbgfx
 LINK := $(RGBDS)rgblink
 FIX := $(RGBDS)rgbfix
+IMGEDITOR = convert
 
 # Tool flags
 FIXFLAGS := -v -p 0xFF
@@ -45,22 +47,20 @@ OBJS = $(patsubst %.asm,$(OBJDIR)/%.o,$(notdir $(ASMSOURCES_COLLECTED)))
 all: $(BINS)
 # ANCHOR: generate-graphics
 NEEDED_GRAPHICS = \
-	$(GENBACKGROUNDS)/gameboy_outdoor.2bpp \
-
-	#$(GENSPRITES)/player-ship.2bpp \
-	$(GENSPRITES)/enemy-ship.2bpp \
-	$(GENSPRITES)/bullet.2bpp \
-	$(GENBACKGROUNDS)/text-font.2bpp \
-	$(GENBACKGROUNDS)/star-field.tilemap \
-	$(GENBACKGROUNDS)/title-screen.tilemap
+	$(GENBACKGROUNDS)/tilemap1.2bpp \
+	$(GENBACKGROUNDS)/tilemap1.tilemap
 
 # Generate sprites, ensuring the containing directories have been created.
 $(GENSPRITES)/%.2bpp: $(RESSPRITES)/%.png | $(GENSPRITES)
-	$(GFX) -c "#FFFFFF,#cfcfcf,#686868,#000000;" --columns -o $@ $<
+	$(GFX) -c "#FFFFFF,#cfcfcf,#686868,#000000;" --columns -o $@ 
 
 # Generate background tile set, ensuring the containing directories have been created.
 $(GENBACKGROUNDS)/%.2bpp: $(RESBACKGROUNDS)/%.png | $(GENBACKGROUNDS)
-	$(GFX) -c "#FFFFFF,#cbcbcb,#414141,#000000;" -o $@ $<
+# Convertimos los píxeles transparentes en negros.
+#$(IMGEDITOR) $< -background black -alpha remove -alpha off /tmp/norm.png
+# forzar el modo indexado con exactamente 4 colores, sin que ImageMagick reorganice los valores RGB
+	$(IMGEDITOR) /tmp/norm.png -colors 4 -type palette +dither /tmp/norm.png
+	$(GFX) -o $@ /tmp/norm.png
 
 # Generate background tile map *and* tile set, ensuring the containing directories
 # have been created.

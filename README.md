@@ -22,6 +22,7 @@ También va a ser necesario idear el videojuego a desarrollar cuando se controle
     - [x] Realizar el primer tutorial de gbdev: Un juego Arkanoid.
 
 - La aventura continúa
+    - [ ] Modificar el makefile a mi gusto.
     - [ ] Realizar el segundo tutorial de gbdev: Juego Shooter.
     - [ ] Renderizado avanzado de backgrounds.
     - [ ] Cinemáticas.
