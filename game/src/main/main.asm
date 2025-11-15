@@ -21,6 +21,7 @@ EntryPoint:
 	; Shut down audio circuitry
 	xor a
 	ld [rNR52], a
+	ld a,2
 	ld [wGameState], a
 
 	; Wait for the vertical blank phase before initiating the library

@@ -1,36 +1,12 @@
 ; ANCHOR: gameplay-data-variables
 INCLUDE "src/main/utils/hardware.inc"
-INCLUDE "src/main/utils/macros/text-macros.inc"
-
-SECTION "GameplayVariables", WRAM0
-
-wScore:: ds 6
-wLives:: db
 
 SECTION "GameplayState", ROM0
-
-wScoreText::  db "score", 255
-wLivesText::  db "lives", 255
-; ANCHOR_END: gameplay-data-variables
 
 ; ANCHOR: init-gameplay-state
 InitGameplayState::
 
-	ld a, 3
-	ld [wLives], a
-
-	xor a
-	ld [wScore], a
-	ld [wScore+1], a
-	ld [wScore+2], a
-	ld [wScore+3], a
-	ld [wScore+4], a
-	ld [wScore+5], a
-
 	call InitializeBackground
-	call InitializePlayer
-	call InitializeBullets
-	call InitializeEnemies
 
 	; Initiate STAT interrupts
 	call InitStatInterrupts

@@ -47,7 +47,7 @@ OBJS = $(patsubst %.asm,$(OBJDIR)/%.o,$(notdir $(ASMSOURCES_COLLECTED)))
 all: $(BINS)
 # ANCHOR: generate-graphics
 NEEDED_GRAPHICS = \
-	$(GENBACKGROUNDS)/tilemap1.2bpp \
+	#$(GENBACKGROUNDS)/tilemap1.2bpp \
 	$(GENBACKGROUNDS)/tilemap1.tilemap
 
 # Generate sprites, ensuring the containing directories have been created.
@@ -57,7 +57,7 @@ $(GENSPRITES)/%.2bpp: $(RESSPRITES)/%.png | $(GENSPRITES)
 # Generate background tile set, ensuring the containing directories have been created.
 $(GENBACKGROUNDS)/%.2bpp: $(RESBACKGROUNDS)/%.png | $(GENBACKGROUNDS)
 # Convertimos los píxeles transparentes en negros.
-#$(IMGEDITOR) $< -background black -alpha remove -alpha off /tmp/norm.png
+	$(IMGEDITOR) $< -background black -alpha remove -alpha off /tmp/norm.png
 # forzar el modo indexado con exactamente 4 colores, sin que ImageMagick reorganice los valores RGB
 	$(IMGEDITOR) /tmp/norm.png -colors 4 -type palette +dither /tmp/norm.png
 	$(GFX) -o $@ /tmp/norm.png
