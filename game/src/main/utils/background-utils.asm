@@ -5,6 +5,9 @@ SECTION "Background", ROM0
 
 ClearBackground::
 
+	; Do not turn the LCD off outside of VBlank
+    call WaitForOneVBlank
+
 	; Turn the LCD off
 	xor a
 	ld [rLCDC], a
@@ -17,18 +20,13 @@ ClearBackgroundLoop:
 	xor a
 	ld [hli], a
 
-	
 	dec bc
 	ld a, b
 	or c
-
 	jp nz, ClearBackgroundLoop
-
 
 	; Turn the LCD on
 	ld a, LCDCF_ON  | LCDCF_BGON|LCDCF_OBJON | LCDCF_OBJ16
 	ld [rLCDC], a
 
-
 	ret
-; ANCHOR_END: background-utils

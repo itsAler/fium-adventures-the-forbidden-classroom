@@ -12,8 +12,6 @@ InitGameplayState::
 
 	call InitializeBackground
 	;call InitializePlayer
-	;call InitializeBullets
-	;call InitializeEnemies
 
 	; Initiate STAT interrupts
 	call InitStatInterrupts
