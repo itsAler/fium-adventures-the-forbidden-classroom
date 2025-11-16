@@ -1,2 +1,4 @@
 *.gb
 *.o
+*.2bpp
+*.tilemap

@@ -1,7 +1,7 @@
 
 SECTION "Text", ROM0
 
-textFontTileData: INCBIN "src/generated/backgrounds/text-font.2bpp"
+textFontTileData: ; TODO: LA TEXT FONT VA AQUÍ
 textFontTileDataEnd:
 ; ANCHOR: load-text-font
 

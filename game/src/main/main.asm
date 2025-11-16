@@ -36,11 +36,6 @@ EntryPoint:
 	xor a
 	ld [rLCDC], a
 
-	; Load our common text font into VRAM
-	;call LoadTextFontIntoVRAM
-
-	; Copiar tiles y tilemap
-
 	; Turn the LCD on
 	ld a, LCDCF_ON  | LCDCF_BGON|LCDCF_OBJON | LCDCF_OBJ16 | LCDCF_WINON | LCDCF_WIN9C00
 	ld [rLCDC], a
@@ -67,8 +62,10 @@ NextGameState::
 
 	ld [rSCX], a
 	ld [rSCY], a
-	ld [rWX], a
 	ld [rWY], a
+	ld a, 7
+	ld [rWX], a
+	
 	; disable interrupts
 	call DisableInterrupts
 	
@@ -76,22 +73,10 @@ NextGameState::
 	call ClearAllSprites
 
 	; Initiate the next state
-	ld a, [wGameState]
-	cp 2 ; 2 = Gameplay
 	call z, InitGameplayState
-	ld a, [wGameState]
-	cp 1 ; 1 = Story
-	call z, InitStoryState
-	ld a, [wGameState]
-	and a ; 0 = Menu
-	call z, InitTitleScreenState
 
 	; Update the next state
-	ld a, [wGameState]
-	cp 2 ; 2 = Gameplay
 	jp z, UpdateGameplayState
-	cp 1 ; 1 = Story
-	jp z, UpdateStoryState
-	jp UpdateTitleScreenState
+
 
 ; ANCHOR_END: next-game-state
