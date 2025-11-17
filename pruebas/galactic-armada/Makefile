@@ -1,10 +1,10 @@
 # You can set the name of the .gb ROM file here
-PROJECTNAME    	= gamename
+PROJECTNAME    	= GalacticArmada
 SRCDIR      	= src
 LIBDIR      	= libs
 OBJDIR      	= obj
 DSTDIR      	= dist
-RESDIR      	= assets
+RESDIR      	= $(SRCDIR)/resources
 ASMDIR          = $(SRCDIR)/main
 RESSPRITES      = $(RESDIR)/sprites
 RESBACKGROUNDS  = $(RESDIR)/backgrounds
@@ -43,24 +43,29 @@ ASMSOURCES_COLLECTED = \
 OBJS = $(patsubst %.asm,$(OBJDIR)/%.o,$(notdir $(ASMSOURCES_COLLECTED)))
 
 all: $(BINS)
+
 # ANCHOR: generate-graphics
 NEEDED_GRAPHICS = \
-	$(GENBACKGROUNDS)/spawn.2bpp \
-	$(GENBACKGROUNDS)/spawn.tilemap \
-	$(GENSPRITES)/player.2bpp
+	$(GENSPRITES)/player-ship.2bpp \
+	$(GENSPRITES)/enemy-ship.2bpp \
+	$(GENSPRITES)/bullet.2bpp \
+	$(GENBACKGROUNDS)/text-font.2bpp \
+	$(GENBACKGROUNDS)/star-field.tilemap \
+	$(GENBACKGROUNDS)/title-screen.tilemap
 
 # Generate sprites, ensuring the containing directories have been created.
 $(GENSPRITES)/%.2bpp: $(RESSPRITES)/%.png | $(GENSPRITES)
-	$(GFX) --columns -o $@ $< 
+	$(GFX) -c "#FFFFFF,#cfcfcf,#686868,#000000;" --columns -o $@ $<
 
 # Generate background tile set, ensuring the containing directories have been created.
 $(GENBACKGROUNDS)/%.2bpp: $(RESBACKGROUNDS)/%.png | $(GENBACKGROUNDS)
-	$(GFX) -o $@ $<
+	$(GFX) -c "#FFFFFF,#cbcbcb,#414141,#000000;" -o $@ $<
 
 # Generate background tile map *and* tile set, ensuring the containing directories
 # have been created.
 $(GENBACKGROUNDS)/%.tilemap: $(RESBACKGROUNDS)/%.png | $(GENBACKGROUNDS)
-	$(GFX) --tilemap $@ \
+	$(GFX) -c "#FFFFFF,#cbcbcb,#414141,#000000;" \
+		--tilemap $@ \
 		--unique-tiles \
 		-o $(GENBACKGROUNDS)/$*.2bpp \
 		$<
@@ -106,14 +111,9 @@ PREPARE_DIRECTORIES = \
 
 $(foreach i, $(PREPARE_DIRECTORIES), $(eval $(call ensure-directory,$i)))
 
-
-
-
 # Clean up generated directories.
 clean:
 	rm -rfv  $(PREPARE_DIRECTORIES)
 # Declare these targets as "not actually files".
 .PHONY: clean all
-# Evitar borrar los ficheros intermedios de los gráficos
-.PRECIOUS: $(GENBACKGROUNDS)/%.2bpp  $(GENBACKGROUNDS)/%.tilemap $(GENSPRITES)/%.2bpp
 

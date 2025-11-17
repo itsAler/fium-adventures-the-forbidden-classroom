@@ -1,6 +1,5 @@
+; ANCHOR: gameplay-data-variables
 INCLUDE "src/main/utils/hardware.inc"
-
-SECTION "GameplayVariables", WRAM0
 
 SECTION "GameplayState", ROM0
 
@@ -8,10 +7,9 @@ SECTION "GameplayState", ROM0
 InitGameplayState::
 
 	call InitializeBackground
-	call InitializePlayer
 
 	; Initiate STAT interrupts
-	;call InitStatInterrupts
+	call InitStatInterrupts
 
 	xor a
 	ld [rWY], a
@@ -39,6 +37,40 @@ UpdateGameplayState::
 	; So it's best to use some tested code
     call Input
 ; ANCHOR_END: update-gameplay-state-start
+
+; ANCHOR: update-gameplay-oam
+	; from: https://github.com/eievui5/gb-sprobj-lib
+	; hen put a call to ResetShadowOAM at the beginning of your main loop.
+	call ResetShadowOAM
+	call ResetOAMSpriteAddress
+; ANCHOR_END: update-gameplay-oam
+	
+; ANCHOR: update-gameplay-elements
+	call UpdatePlayer
+	call UpdateEnemies
+	call UpdateBullets
+	call UpdateBackground
+; ANCHOR_END: update-gameplay-elements
+	
+; ANCHOR: update-gameplay-clear-sprites
+	; Clear remaining sprites to avoid lingering rogue sprites
+	call ClearRemainingSprites
+; ANCHOR_END: update-gameplay-clear-sprites
+
+; ANCHOR: update-gameplay-end-update
+	ld a, [wLives]
+	cp 250
+	jp nc, EndGameplay
+
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ; Call our function that performs the code
+    call WaitForOneVBlank
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+	; from: https://github.com/eievui5/gb-sprobj-lib
+	; Finally, run the following code during VBlank:
+	ld a, HIGH(wShadowOAM)
+	call hOAMDMA
 
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ; Call our function that performs the code

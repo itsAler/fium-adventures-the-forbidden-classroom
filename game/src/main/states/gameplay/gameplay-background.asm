@@ -27,7 +27,6 @@ InitializeBackground::
 	ret
 
 
-
 ; This is called during gameplay state on every frame
 UpdateBackground::
 	ret

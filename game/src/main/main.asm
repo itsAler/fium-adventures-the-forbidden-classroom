@@ -53,7 +53,7 @@ NextGameState::
 	call z, InitGameplayState
 
 	; Update the next state
-	jp z, UpdateGameplayState
+	;jp z, UpdateGameplayState
 
 
 ; ANCHOR_END: next-game-state
