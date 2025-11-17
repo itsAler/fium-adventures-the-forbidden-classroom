@@ -12,7 +12,6 @@ GENDIR	    	= $(SRCDIR)/generated
 GENSPRITES	    = $(GENDIR)/sprites
 GENBACKGROUNDS	= $(GENDIR)/backgrounds
 BINS	    	= $(DSTDIR)/$(PROJECTNAME).gb
-NORMALIZEDBG := $(GENBACKGROUNDS)/$%_normalized.png
 
 # Tools
 RGBDS ?=
