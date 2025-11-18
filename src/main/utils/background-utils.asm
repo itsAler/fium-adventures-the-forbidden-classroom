@@ -5,9 +5,6 @@ SECTION "Background", ROM0
 
 ClearBackground::
 
-	; Do not turn the LCD off outside of VBlank
-    call WaitForOneVBlank
-
 	; Turn the LCD off
 	xor a
 	ld [rLCDC], a

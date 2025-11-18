@@ -33,6 +33,9 @@ EntryPoint:
 
 NextGameState::
 
+	; Do not turn the LCD off outside of VBlank
+    call WaitForOneVBlank
+
 	call ClearBackground
 	call ClearAllSprites
 
