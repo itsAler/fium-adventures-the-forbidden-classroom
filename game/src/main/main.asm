@@ -31,10 +31,10 @@ EntryPoint:
 	ld [rOBP0], a
 
 
-
 NextGameState::
 
 	call ClearBackground
+	call ClearAllSprites
 
 	; Turn the LCD off
 	xor a
@@ -50,10 +50,10 @@ NextGameState::
 	call DisableInterrupts
 
 	; Initiate the next state
-	call z, InitGameplayState
+	call InitGameplayState
 
 	; Update the next state
-	;jp z, UpdateGameplayState
+	jp UpdateGameplayState
 
 
 ; ANCHOR_END: next-game-state

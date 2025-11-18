@@ -11,7 +11,7 @@ InitGameplayState::
 	call InitializePlayer
 
 	; Initiate STAT interrupts
-	;call InitStatInterrupts
+	call InitStatInterrupts
 
 	xor a
 	ld [rWY], a
