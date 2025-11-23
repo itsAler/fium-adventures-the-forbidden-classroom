@@ -109,8 +109,10 @@ $(foreach i, $(PREPARE_DIRECTORIES), $(eval $(call ensure-directory,$i)))
 # Clean up generated directories.
 clean:
 	rm -rfv  $(PREPARE_DIRECTORIES)
+
 # Declare these targets as "not actually files".
 .PHONY: clean all
-# Evitar borrar los ficheros intermedios de los gráficos al generar el proyecto
+
+# Evitar borrar los ficheros generados por RGBGFX de los gráficos al generar el proyecto
 .PRECIOUS: $(GENBACKGROUNDS)/%.2bpp  $(GENBACKGROUNDS)/%.tilemap $(GENSPRITES)/%.2bpp
 
