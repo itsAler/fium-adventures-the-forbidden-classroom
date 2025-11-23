@@ -6,7 +6,6 @@ SECTION "GameVariables", WRAM0
 wLastKeys:: db
 wCurKeys:: db
 wNewKeys:: db
-wGameState::db
 
 SECTION "Header", ROM0[$100]
 
@@ -19,44 +18,23 @@ EntryPoint:
 	; Shut down audio circuitry
 	xor a
 	ld [rNR52], a
-	ld a,2
-	ld [wGameState], a
 
-	; Wait for the vertical blank phase before initiating the library
+	; Solo se puede apagar la pantalla en VBLANK, o podemos
+	; freir el LCD de una gameboy de verdad.
     call WaitForOneVBlank
+
+	; Apagamos LCD, en este punto podemos escribir tiles
+	; en la VRAM.
+	xor a
+	ld [rLCDC], a
 
 	; During the first (blank) frame, initialize display registers
 	ld a, %11100100
 	ld [rBGP], a
 	ld [rOBP0], a
 
-
-NextGameState::
-
-	; Do not turn the LCD off outside of VBlank
-    call WaitForOneVBlank
-
-	call ClearBackground
-	call ClearAllSprites
-
-	; Turn the LCD off
-	xor a
-	ld [rLCDC], a
-
-	ld [rSCX], a
-	ld [rSCY], a
-	ld [rWY], a
-	ld a, 7
-	ld [rWX], a
-	
-	; disable interrupts
-	call DisableInterrupts
-
 	; Initiate the next state
 	call InitGameplayState
 
 	; Update the next state
 	jp UpdateGameplayState
-
-
-; ANCHOR_END: next-game-state

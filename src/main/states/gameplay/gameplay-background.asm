@@ -12,21 +12,20 @@ spawnTileDataEnd:
 InitializeBackground::
 
 	; Copy the tile data
-	ld de, spawnTileData ; de contains the address where data will be copied from;
-	ld hl, _VRAM9000 ; hl contains the address where data will be copied to;
+	ld de, spawnTileData 	; de contains the address where data will be copied from;
+	ld hl, $9000 			; hl contains the address where data will be copied to;
 	ld bc, spawnTileDataEnd - spawnTileData ; bc contains how many bytes we have to copy.
     call CopyDEintoMemoryAtHL
 
 	; Copy the tilemap
 	ld de, spawnMap
-	ld hl, _SCRN0
+	ld hl, $9800
 	ld bc, spawnMapEnd - spawnMap
-
     call CopyDEintoMemoryAtHL
 
 	ret
 
-
+	
 ; This is called during gameplay state on every frame
 UpdateBackground::
 	ret

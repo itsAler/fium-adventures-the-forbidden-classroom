@@ -8,11 +8,9 @@ SECTION "GameplayState", ROM0
 InitGameplayState::
 
 	call InitializeBackground
-	call InitializePlayer
+	;call InitializePlayer
 
-	; Initiate STAT interrupts
-	call InitStatInterrupts
-
+	; Reseteamos la posición de la ventana.
 	xor a
 	ld [rWY], a
 
@@ -20,36 +18,12 @@ InitGameplayState::
 	ld [rWX], a
 
 	; Turn the LCD on
-	ld a, LCDCF_ON  | LCDCF_BGON|LCDCF_OBJON | LCDCF_OBJ16 | LCDCF_WINON | LCDCF_WIN9C00|LCDCF_BG9800
+	;ld a, LCDCF_ON  | LCDCF_BGON | LCDCF_OBJON | LCDCF_OBJ16 | LCDCF_WINON | LCDCF_WIN9C00|LCDCF_BG9800
+	ld a, LCDCF_ON | LCDCF_BGON
 	ld [rLCDC], a
 
     ret
-; ANCHOR_END: init-gameplay-state
-	
-; ANCHOR: update-gameplay-state-start
+
+
 UpdateGameplayState::
-
-	; save the keys last frame
-	ld a, [wCurKeys]
-	ld [wLastKeys], a
-
-	; This is in input.asm
-	; It's straight from: https://gbdev.io/gb-asm-tutorial/part2/input.html
-	; In their words (paraphrased): reading player input for gameboy is NOT a trivial task
-	; So it's best to use some tested code
-    call Input
-; ANCHOR_END: update-gameplay-state-start
-
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ; Call our function that performs the code
-    call WaitForOneVBlank
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	
 	jp UpdateGameplayState
-
-EndGameplay:
-	
-    ld a, 0
-    ld [wGameState],a
-    jp NextGameState
-; ANCHOR_END: update-gameplay-end-update
