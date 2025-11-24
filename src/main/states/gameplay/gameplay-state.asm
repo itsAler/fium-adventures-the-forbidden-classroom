@@ -26,4 +26,8 @@ InitGameplayState::
 
 
 UpdateGameplayState::
+	; Esperamos a que termine de actualizar la pantalla
+	call WaitForOneVBlank
+
+	
 	jp UpdateGameplayState

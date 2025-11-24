@@ -25,3 +25,6 @@ InitializePlayer::
     ld [hli], a     ; Attributes 0
 
     ret
+
+UpdatePlayer::
+    ret

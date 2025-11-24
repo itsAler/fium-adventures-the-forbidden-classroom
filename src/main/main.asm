@@ -33,8 +33,8 @@ EntryPoint:
 	ld [rBGP], a
 	ld [rOBP0], a
 
-	; Initiate the next state
-	call InitGameplayState
+	call CopyDMARoutineToHRAM
 
-	; Update the next state
+	call InitGameplayState
+	
 	jp UpdateGameplayState
