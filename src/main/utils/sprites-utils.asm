@@ -1,6 +1,10 @@
 
 include "src/main/utils/hardware.inc"
 
+SECTION "OAM DMA", HRAM
+hOAMDMA::
+    ds DMARoutineEnd - DMARoutine ; Reservamos espacio para copiar la rutina DMA
+
 SECTION "SpriteVariables", WRAM0
 
 wLastOAMAddress:: dw
@@ -9,84 +13,49 @@ wHelperValue::db
 
 SECTION "Sprites", ROM0
 
-ClearAllSprites::
-	 
-	; Start clearing oam
-	xor a
-    ld b, OAM_COUNT*sizeof_OAM_ATTRS ; 40 sprites times 4 bytes per sprite
-    ld hl, wShadowOAM ; The start of our oam sprites in RAM
-
-ClearOamLoop::
+; La pantalla debe estar apagada para acceder de manera
+; segura a la OAM.
+ClearOAM::
+    xor a
+    ld b, 160
+    ld hl, _OAMRAM
+ClearOam:
     ld [hli], a
     dec b
-    jp nz, ClearOamLoop
-    xor a
-    ld [wSpritesUsed], a
-    
-    
-	; from: https://github.com/eievui5/gb-sprobj-lib
-	; Finally, run the following code during VBlank:
-	ld a, HIGH(wShadowOAM)
-	jp hOAMDMA
-
-ClearRemainingSprites::
-
-ClearRemainingSprites_Loop::
-
-    ;Get our offset address in hl
-	ld a,[wLastOAMAddress]
-    ld l, a
-	ld a, HIGH(wShadowOAM)
-    ld h, a
-
-    ld a, l
-    cp 160
-    ret nc
-
-    ; Set the y and x to be 0
-    xor a
-    ld [hli], a
-    ld [hld], a
-
-    ; Move up 4 bytes
-    ld a, l
-    add 4
-    ld l, a
-
-    call NextOAMSprite
-
-
-    jp ClearRemainingSprites_Loop
-
-; ANCHOR: reset-oam-sprite-address
-ResetOAMSpriteAddress::
-    
-    xor a
-    ld [wSpritesUsed], a
-
-	ld a, LOW(wShadowOAM)
-	ld [wLastOAMAddress], a
-	ld a, HIGH(wShadowOAM)
-	ld [wLastOAMAddress+1], a
+    jp nz, ClearOam
 
     ret
-; ANCHOR_END: reset-oam-sprite-address
 
-; ANCHOR: next-oam-sprite
-NextOAMSprite::
+SECTION "OAM DMA routine", ROM0
 
-    ld a, [wSpritesUsed]
-    inc a
-    ld [wSpritesUsed], a
-
-	ld a,[wLastOAMAddress]
-    add sizeof_OAM_ATTRS
-	ld [wLastOAMAddress], a
-	ld a, HIGH(wShadowOAM)
-	ld [wLastOAMAddress+1], a
-
-
+; LLamar una vez al inicio del juego. Imprescindible para el funcionamiento
+; de la función de transferencia por DMA de la shadowOAM a OAM.
+; https://gbdev.gg8.se/wiki/articles/OAM_DMA_tutorial
+CopyDMARoutineToHRAM:
+    ld hl, DMARoutine
+    ld b, DMARoutineEnd - DMARoutine ; Número de bytes a copiar
+    ld c, LOW(hOAMDMA) ; Low byte de la dirección de destino. en HRAM, etiqueta fija.
+.copy
+    ld a, [hli]
+    inc c
+    ; ldh automáticamente asigna FF en el high byte, siendo c el lowbyte 
+    ; forma la dir. completa en HRAM. Ahorrando una variable doble, y 
+    ; convirtiendo esta línea de código en un "optimiseision paradais"
+    ldh [c], a 
+    dec b
+    jr nz, .copy
     ret
-; ANCHOR_END: next-oam-sprite
 
-    
+; La rutina de transferencia de RAM a OAM.
+DMARoutine:
+    ; Escribir en esta dirección inicia una transferencia DMA a la dirección
+    ; aa00, siendo aa un byte. Si a = 8A, entonces rDMA=8A00.
+    ldh [rDMA], a 
+
+    ; Esperamos 160 nanosegundos con la siguiente función:
+    ld a, 40
+.wait
+    dec a
+    jr  nz, .wait
+    ret
+DMARoutineEnd:

@@ -8,6 +8,7 @@ SECTION "GameplayState", ROM0
 InitGameplayState::
 
 	call InitializeBackground
+	call ClearOAM 				;Limpiamos la OAM de basura.
 	call InitializePlayer
 
 	; Reseteamos la posición de la ventana.
