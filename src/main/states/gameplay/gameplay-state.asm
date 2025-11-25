@@ -8,8 +8,10 @@ SECTION "GameplayState", ROM0
 InitGameplayState::
 
 	call InitializeBackground
-	call ClearOAM 				;Limpiamos la OAM de basura.
+	call ClearShadowOAM
 	call InitializePlayer
+	ld a, HIGH(wShadowOAM)
+	call hOAMDMA
 
 	; Reseteamos la posición de la ventana.
 	xor a
@@ -26,8 +28,12 @@ InitGameplayState::
 
 
 UpdateGameplayState::
-	; Esperamos a que termine de actualizar la pantalla
-	call WaitForOneVBlank
 
-	
+	;call WaitForOneVBlank
+
+	;call UpdatePlayer
+
+	;ld a, HIGH(wShadowOAM)
+	;call hOAMDMA
+
 	jp UpdateGameplayState
