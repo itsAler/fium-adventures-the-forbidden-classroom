@@ -1,10 +1,6 @@
 
 include "src/main/utils/hardware.inc"
 
-SECTION "SpriteVariables", WRAM0
-
-wPlayerSprites: ds 4 * 1 ; 4 bytes/sprite * 1 sprite (doble, LCDCF_OBJ16=1)
-
 
 SECTION "Shadow OAM", WRAM0, ALIGN[8]
 ; La shadow OAM es una copia de la OAM en memoria RAM normal,
