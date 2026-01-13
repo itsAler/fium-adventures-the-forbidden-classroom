@@ -21,7 +21,7 @@ WaitForKeyFunction_Loop:
 	; It's straight from: https://gbdev.io/gb-asm-tutorial/part2/input.html
 	; In their words (paraphrased): reading player input for gameboy is NOT a trivial task
 	; So it's best to use some tested code
-    call Input
+    call UpdateInputKeys
 
     
 	ld a, [mWaitKey]

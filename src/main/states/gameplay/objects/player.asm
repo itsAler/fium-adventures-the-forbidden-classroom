@@ -1,5 +1,6 @@
 INCLUDE "src/main/utils/hardware.inc"
 
+
 SECTION "GameplayPlayerSection", ROM0
 
 playerTiles: INCBIN "src/generated/sprites/player.2bpp"
@@ -25,4 +26,62 @@ InitializePlayer::
     ret
 
 UpdatePlayer::
+    ; Actualizar la entrada
+    call UpdateInputKeys
+
+    ; Comprobar la entrada
+CheckLeft:
+    ld a, [wCurKeys]
+    and a, PADF_LEFT
+    jp z, CheckRight
+    ;Mover la cámara si no colisiona con un márgen
+    ;ld a, [wShadowOAM+1]
+    ;dec a
+    ;ld [wShadowOAM+1], a
+
+    ld a, [rSCX]
+    call checkBorderCollision
+
+    dec a
+    ld [rSCX], a
+    jp checkEnd
+CheckRight:
+    ld a, [wCurKeys]
+    and a, PADF_RIGHT
+    jp z, CheckDown
+    ; Mover a la der.
+    ld a, [wShadowOAM+1]
+    inc a
+    ;ld [wShadowOAM+1], a
+
+    ld a, [rSCX]
+    inc a
+    ld [rSCX], a
+    jp checkEnd
+CheckDown:
+    ld a, [wCurKeys]
+    and a, PADF_DOWN
+    jp z, CheckUp
+    ; Mover abajo
+    ld a, [wShadowOAM]
+    inc a
+    ;ld [wShadowOAM], a
+
+    ld a, [rSCY]
+    inc a
+    ld [rSCY], a
+    jp checkEnd
+CheckUp:
+    ld a, [wCurKeys]
+    and a, PADF_UP
+    jp z, checkEnd
+    ; Mover arriba
+    ld a, [wShadowOAM]
+    dec a
+    ;ld [wShadowOAM], a
+
+    ld a, [rSCY]
+    dec a
+    ld [rSCY], a
+checkEnd:
     ret

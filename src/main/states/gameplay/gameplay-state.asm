@@ -2,9 +2,11 @@ INCLUDE "src/main/utils/hardware.inc"
 
 SECTION "GameplayVariables", WRAM0
 
+bgScroll_X:: db
+bgScroll_Y:: db
+
 SECTION "GameplayState", ROM0
 
-; ANCHOR: init-gameplay-state
 InitGameplayState::
 
 	call InitializeBackground
@@ -13,10 +15,11 @@ InitGameplayState::
 	ld a, HIGH(wShadowOAM)
 	call hOAMDMA
 
-	; Reseteamos la posición de la ventana.
+	; Reset window and scroll.
 	xor a
 	ld [rWY], a
-
+	ld [bgScroll_X], a
+	ld [bgScroll_Y], a
 	ld a, 7
 	ld [rWX], a
 
@@ -29,11 +32,14 @@ InitGameplayState::
 
 UpdateGameplayState::
 
-	;call WaitForOneVBlank
+	call WaitForOneVBlankFunction
+	; Actualizar jugador
+	call UpdatePlayer
 
-	;call UpdatePlayer
 
-	;ld a, HIGH(wShadowOAM)
-	;call hOAMDMA
+
+	; Actualizar OAM
+	ld a, HIGH(wShadowOAM)
+	call hOAMDMA
 
 	jp UpdateGameplayState

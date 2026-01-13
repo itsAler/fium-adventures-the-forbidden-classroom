@@ -1,38 +1,38 @@
-; ANCHOR: vblank-utils
 INCLUDE "src/main/utils/hardware.inc"
 
 SECTION "VBlankVariables", WRAM0
 
 wVBlankCount:: db 
 
+
 SECTION "VBlankFunctions", ROM0
 
-WaitForOneVBlank::
+WaitForOneVBlankFunction::
+    ld a,1
+    ld [wVBlankCount],a
 
-    ; Wait a small amount of time
-    ; Save our count in this variable
-    ld a, 1
-    ld [wVBlankCount], a
-
+; Espera a vBlank las veces especificadas en la variable wVBlankCount
 WaitForVBlankFunction::
-
-WaitForVBlankFunction_Loop::
-
-	ld a, [rLY] ; Copy the vertical line to a
-	cp 144 ; Check if the vertical line (in a) is 0
-	jp c, WaitForVBlankFunction_Loop ; A conditional jump. The condition is that 'c' is set, the last operation overflowed
+    ; Guardar en pila BC y cargar contador de vBlank
+    push bc
 
     ld a, [wVBlankCount]
-    sub 1
-    ld [wVBlankCount], a
-    ret z
+    ld b, a
 
-WaitForVBlankFunction_Loop2::
+.WaitForVBlankFunction_Loop:
+    ; En bucle hasta que línea LCD == 144 (Vblank)
+	ld a, [rLY]
+	cp 144 ; C set if A < 144
+	jp c, WaitForVBlankFunction_Loop
 
-	ld a, [rLY] ; Copy the vertical line to a
-	cp 144 ; Check if the vertical line (in a) is 0
-	jp nc, WaitForVBlankFunction_Loop2 ; A conditional jump. The condition is that 'c' is set, the last operation overflowed
-
+    ; Decrementar contador y salir del bucle si es 0
+    ld a, b 
+    sub a, 1
+    ld b, a
+    jp z, WaitForVBlankFunction_End
+    ; Volver a realizar el bucle de espera a vBlank
     jp WaitForVBlankFunction_Loop
 
-; ANCHOR_END: vblank-utils
+.WaitForVBlankFunction_End:
+    pop bc
+    ret
