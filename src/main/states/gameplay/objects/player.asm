@@ -39,49 +39,50 @@ CheckLeft:
     ;dec a
     ;ld [wShadowOAM+1], a
 
-    ld a, [rSCX]
-    call checkBorderCollision
-
+    ld a, [bgScroll_X]
     dec a
-    ld [rSCX], a
+    ld [bgScroll_X], a
     jp checkEnd
 CheckRight:
     ld a, [wCurKeys]
     and a, PADF_RIGHT
     jp z, CheckDown
     ; Mover a la der.
-    ld a, [wShadowOAM+1]
-    inc a
+    ;ld a, [wShadowOAM+1]
+    ;inc a
     ;ld [wShadowOAM+1], a
 
-    ld a, [rSCX]
+    ld a, [bgScroll_X]
     inc a
-    ld [rSCX], a
+    ld [bgScroll_X], a
     jp checkEnd
 CheckDown:
     ld a, [wCurKeys]
     and a, PADF_DOWN
     jp z, CheckUp
     ; Mover abajo
-    ld a, [wShadowOAM]
-    inc a
+    ;ld a, [wShadowOAM]
+    ;inc a
     ;ld [wShadowOAM], a
 
-    ld a, [rSCY]
+    ld a, [bgScroll_Y]
     inc a
-    ld [rSCY], a
+    ld [bgScroll_Y], a
     jp checkEnd
 CheckUp:
     ld a, [wCurKeys]
     and a, PADF_UP
     jp z, checkEnd
     ; Mover arriba
-    ld a, [wShadowOAM]
-    dec a
+    ;ld a, [wShadowOAM]
+    ;dec a
     ;ld [wShadowOAM], a
-
-    ld a, [rSCY]
+    ld a, [bgScroll_Y]
     dec a
-    ld [rSCY], a
+    ld [bgScroll_Y], a
 checkEnd:
+    ld a, [bgScroll_X]
+    ld [rSCX], a
+    ld a, [bgScroll_Y]
+    ld [rSCY], a
     ret

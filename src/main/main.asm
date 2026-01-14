@@ -22,7 +22,7 @@ EntryPoint:
 
 	; Solo se puede apagar la pantalla en VBLANK, o podemos
 	; freir el LCD de una gameboy de verdad.
-    call WaitForOneVBlankFuncion
+    call WaitForOneVBlankFunction
 
 	; Apagamos LCD, en este punto podemos escribir tiles
 	; en la VRAM.

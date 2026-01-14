@@ -19,7 +19,7 @@ WaitForVBlankFunction::
     ld a, [wVBlankCount]
     ld b, a
 
-.WaitForVBlankFunction_Loop:
+WaitForVBlankFunction_Loop:
     ; En bucle hasta que línea LCD == 144 (Vblank)
 	ld a, [rLY]
 	cp 144 ; C set if A < 144
@@ -33,6 +33,6 @@ WaitForVBlankFunction::
     ; Volver a realizar el bucle de espera a vBlank
     jp WaitForVBlankFunction_Loop
 
-.WaitForVBlankFunction_End:
+WaitForVBlankFunction_End:
     pop bc
     ret

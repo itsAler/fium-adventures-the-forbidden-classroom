@@ -36,8 +36,6 @@ UpdateGameplayState::
 	; Actualizar jugador
 	call UpdatePlayer
 
-
-
 	; Actualizar OAM
 	ld a, HIGH(wShadowOAM)
 	call hOAMDMA
