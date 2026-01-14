@@ -2,8 +2,10 @@ INCLUDE "src/main/utils/hardware.inc"
 
 SECTION "GameplayVariables", WRAM0
 
-bgScroll_X:: db
-bgScroll_Y:: db
+wBackgroundScroll_X:: dw
+wBackgroundScroll_Y:: dw
+wBackgroundScroll_X_real:: db
+wBackgroundScroll_Y_real:: db
 
 SECTION "GameplayState", ROM0
 
@@ -18,8 +20,8 @@ InitGameplayState::
 	; Reset window and scroll.
 	xor a
 	ld [rWY], a
-	ld [bgScroll_X], a
-	ld [bgScroll_Y], a
+	ld [wBackgroundScroll_X], a
+	ld [wBackgroundScroll_Y], a
 	ld a, 7
 	ld [rWX], a
 
@@ -31,13 +33,21 @@ InitGameplayState::
 
 
 UpdateGameplayState::
-
-	call WaitForOneVBlankFunction
 	; Actualizar jugador
 	call UpdatePlayer
 
-	; Actualizar OAM
+	call WaitForOneVBlankFunction
+	call UpdateBackgroundScroll
 	ld a, HIGH(wShadowOAM)
 	call hOAMDMA
 
 	jp UpdateGameplayState
+
+; Actualización del BGScroll durante vblank
+UpdateBackgroundScroll::
+	ld a, [wBackgroundScroll_Y_real]
+	ld [rSCY], a
+	ld a, [wBackgroundScroll_X_real]
+	ld [rSCX], a
+
+	ret

@@ -1,5 +1,8 @@
 INCLUDE "src/main/utils/hardware.inc"
 
+SECTION "PlayerVariables", WRAM0
+PLAYER_SPEED:: db
+
 
 SECTION "GameplayPlayerSection", ROM0
 
@@ -23,66 +26,110 @@ InitializePlayer::
     xor a
     ld [wShadowOAM+2], a ; TileID
     ld [wShadowOAM+3], a ; Attr 
+
+    ld a, 8
+    ld [PLAYER_SPEED], a
+
     ret
 
 UpdatePlayer::
-    ; Actualizar la entrada
-    call UpdateInputKeys
 
-    ; Comprobar la entrada
+    call UpdateInputKeys
+    ld hl, PLAYER_SPEED
+
 CheckLeft:
     ld a, [wCurKeys]
     and a, PADF_LEFT
     jp z, CheckRight
-    ;Mover la cámara si no colisiona con un márgen
-    ;ld a, [wShadowOAM+1]
-    ;dec a
-    ;ld [wShadowOAM+1], a
+    
+    jp moveLeft
 
-    ld a, [bgScroll_X]
-    dec a
-    ld [bgScroll_X], a
-    jp checkEnd
 CheckRight:
     ld a, [wCurKeys]
     and a, PADF_RIGHT
     jp z, CheckDown
-    ; Mover a la der.
-    ;ld a, [wShadowOAM+1]
-    ;inc a
-    ;ld [wShadowOAM+1], a
 
-    ld a, [bgScroll_X]
-    inc a
-    ld [bgScroll_X], a
-    jp checkEnd
+    jp moveRight
+
 CheckDown:
     ld a, [wCurKeys]
     and a, PADF_DOWN
     jp z, CheckUp
-    ; Mover abajo
-    ;ld a, [wShadowOAM]
-    ;inc a
-    ;ld [wShadowOAM], a
+    
+    jp moveDown
 
-    ld a, [bgScroll_Y]
-    inc a
-    ld [bgScroll_Y], a
-    jp checkEnd
 CheckUp:
     ld a, [wCurKeys]
     and a, PADF_UP
-    jp z, checkEnd
-    ; Mover arriba
-    ;ld a, [wShadowOAM]
-    ;dec a
-    ;ld [wShadowOAM], a
-    ld a, [bgScroll_Y]
-    dec a
-    ld [bgScroll_Y], a
-checkEnd:
-    ld a, [bgScroll_X]
-    ld [rSCX], a
-    ld a, [bgScroll_Y]
-    ld [rSCY], a
+    jp z, checkNone
+
+    jp moveUp
+
+checkNone:
     ret
+
+
+moveLeft:
+	; mBackGroundScroll tiene 2 bytes en little endian: [LSB][MSB] -> 0x[MSB][LSB]
+	; ADC tiene en cuenta si la suma/resta en el LSB ha desbordado y añade/quita 1 en MSB
+	ld a, [wBackgroundScroll_X+0]
+	sub a, [hl]
+	ld [wBackgroundScroll_X+0], a
+    ld b, a
+	ld a , [wBackgroundScroll_X+1]
+	sbc a , 0
+	ld [wBackgroundScroll_X+1], a
+    ld c, a
+
+    call deEscaleBCtoA
+
+    ld [wBackgroundScroll_X_real], a
+
+    ret
+
+moveRight:
+    ld a, [wBackgroundScroll_X+0]
+	add a, [hl]
+	ld [wBackgroundScroll_X+0], a
+    ld b, a
+	ld a , [wBackgroundScroll_X+1]
+	adc a , 0
+	ld [wBackgroundScroll_X+1], a
+    ld c, a
+
+    call deEscaleBCtoA
+
+    ld [wBackgroundScroll_X_real], a
+    ret
+
+moveDown:
+    ld a, [wBackgroundScroll_Y+0]
+	add a, [hl]
+	ld [wBackgroundScroll_Y+0], a
+    ld b, a
+	ld a , [wBackgroundScroll_Y+1]
+	adc a , 0
+	ld [wBackgroundScroll_Y+1], a
+    ld c, a
+
+    call deEscaleBCtoA
+
+    ld [wBackgroundScroll_Y_real], a
+    ret
+
+moveUp:
+    ld a, [wBackgroundScroll_Y+0]
+	sub a, [hl]
+	ld [wBackgroundScroll_Y+0], a
+    ld b, a
+	ld a , [wBackgroundScroll_Y+1]
+	sbc a , 0
+	ld [wBackgroundScroll_Y+1], a
+    ld c, a
+
+    call deEscaleBCtoA
+
+    ld [wBackgroundScroll_Y_real], a
+    ret
+
+
