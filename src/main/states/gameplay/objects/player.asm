@@ -1,14 +1,16 @@
 INCLUDE "src/main/utils/hardware.inc"
 
 SECTION "PlayerVariables", WRAM0
-PLAYER_SPEED:: db
-
+PLAYER_MOMENTUM_MAX:: db ; SOLO SON UTILIZABLES LOS 7 PRIMEROS BITS: [0, 127]
+PLAYER_MOMENTUM_X:: db ; BIT 7: 0 LEFT 1 RIGHT | BIT 6-0: SPEED [0, 127]
+PLAYER_MOMENTUM_Y:: db ; BIT 7: 0 UP 1 DOWN | BIT 6-0: SPEED [0, 127]
+PLAYER_MOMENTUM_INCREMENT:: db
+PLAYER_MOMENTUM_DECREMENT:: db
 
 SECTION "GameplayPlayerSection", ROM0
 
 playerTiles: INCBIN "src/generated/sprites/player.2bpp"
 playerTilesEnd:
-
 
 InitializePlayer::
     ; Copiar tiles del player
@@ -27,45 +29,105 @@ InitializePlayer::
     ld [wShadowOAM+2], a ; TileID
     ld [wShadowOAM+3], a ; Attr 
 
-    ld a, 8
-    ld [PLAYER_SPEED], a
+    ; Momentum init
+    ld a, 20
+    ld [PLAYER_MOMENTUM_MAX], a
+    ld a, 4
+    ld [PLAYER_MOMENTUM_INCREMENT], a
+    ld a, 2
+    ld [PLAYER_MOMENTUM_DECREMENT], a
+    xor a
+    ld [PLAYER_MOMENTUM_X], a
+    ld [PLAYER_MOMENTUM_Y], a
 
     ret
 
+
 UpdatePlayer::
-
     call UpdateInputKeys
-    ld hl, PLAYER_SPEED
+    call computeMomentum
+    call movePlayer momentumToScroll
 
+computeMomentum:
+    ; Siempre se decrementa el momento, de tal forma que el personaje vaya perdiendo
+    ; velocidad si no hay input por parte del jugador.
+    ld a, [PLAYER_MOMENTUM_DECREMENT]
+    ld b, a
+    ld a, [PLAYER_MOMENTUM_X]
+    sub a, b
+    jp nc, .noUnderflowX
+    xor a
+.noUnderflowX:
+    ld [PLAYER_MOMENTUM_X], a
+
+    ld a, [PLAYER_MOMENTUM_Y]
+    sub a, b
+    jp nc, .noUnderflowY
+    xor a
+.noUnderflowY:
+    ld [PLAYER_MOMENTUM_Y], a
+
+    ; Computar el momento en base al input
 CheckLeft:
     ld a, [wCurKeys]
     and a, PADF_LEFT
     jp z, CheckRight
+
+    ; Si el bit de dirección es 0 (movimiento izq), añadir momento. En otro caso decrementarlo hasta 0.
+    ld a, [PLAYER_MOMENTUM_INCREMENT]
+    ld b, a
+    ld a, [PLAYER_MOMENTUM_MAX]
+    ld c, a
+    ld a, [PLAYER_MOMENTUM_X]
+
+    ;if(mom.x.dir == left) 
+    ;   mom.x.val = (mom.x.val + mom_increment) > mom_max ? mom_max : mom.x.val + mom_increment; 
+    ;else {
+    ;   mom.x.val = (mom.x.val - mom_increment) < 0 ? 0 : mom.x.val - mom_increment
+    ; };
+    bit 7, a           
+    jp nz, .notLeft 
     
-    jp moveLeft
+    ; Como MOM_X solo usa 7b para el valor del momento, podemos permitir que use el siguiente, y así
+    ; solo debemos comparar si MOM_X < MOM_MAX, que automáticamente fallará si es mayor o si hay overflow (
+    ; hemos usado el bit más significativo) ya que MOM_MAX [0-127].
+    add a, b
+    cp a, c
+    jp c, .leftEnd
+    ld a, [PLAYER_MOMENTUM_MAX]
+    res 7, a ; Como hay overflow, A > MOM_MAX que puede ser 127, por lo que se habría usado el bit 7. Resetearlo a 0.
+    jp .leftEnd
+
+.notLeft:
+    sub a, b
+    jp nc, .leftEnd
+    xor a
+
+.leftEnd:
+    ld [PLAYER_MOMENTUM_X], a
 
 CheckRight:
     ld a, [wCurKeys]
     and a, PADF_RIGHT
     jp z, CheckDown
 
-    jp moveRight
+    ;jp moveRight
 
 CheckDown:
     ld a, [wCurKeys]
     and a, PADF_DOWN
     jp z, CheckUp
     
-    jp moveDown
+    ;jp moveDown
 
 CheckUp:
     ld a, [wCurKeys]
     and a, PADF_UP
-    jp z, checkNone
+    jp z, checkEnd
 
-    jp moveUp
+    ;jp moveUp
 
-checkNone:
+checkEnd:
     ret
 
 
@@ -103,33 +165,85 @@ moveRight:
     ret
 
 moveDown:
-    ld a, [wBackgroundScroll_Y+0]
-	add a, [hl]
-	ld [wBackgroundScroll_Y+0], a
-    ld b, a
-	ld a , [wBackgroundScroll_Y+1]
-	adc a , 0
-	ld [wBackgroundScroll_Y+1], a
-    ld c, a
-
-    call deEscaleBCtoA
-
-    ld [wBackgroundScroll_Y_real], a
     ret
 
 moveUp:
-    ld a, [wBackgroundScroll_Y+0]
-	sub a, [hl]
-	ld [wBackgroundScroll_Y+0], a
+    ret
+
+decrementMomentumX:
+    ld a, [PLAYER_MOMENTUM_DECREMENT]
     ld b, a
-	ld a , [wBackgroundScroll_Y+1]
-	sbc a , 0
-	ld [wBackgroundScroll_Y+1], a
+    ld a, [PLAYER_MOMENTUM_X]
+    sub a, b
+    jp c, .BelowMin
+    ld [PLAYER_MOMENTUM_X], a
+.BelowMin:
+    xor a
+    ld [PLAYER_MOMENTUM_X], a
+    ret
+
+decrementMomentumY:
+    ld a, [PLAYER_MOMENTUM_DECREMENT]
+    ld b, a
+    ld a, [PLAYER_MOMENTUM_Y]
+    sub a, b
+    jp c, .BelowMin
+    ld [PLAYER_MOMENTUM_Y], a
+.BelowMin:
+    xor a
+    ld [PLAYER_MOMENTUM_Y], a
+    ret
+
+
+; Aplica el momento del jugador en movimiento de scroll en pantalla
+movePlayer:
+    ld a, [PLAYER_MOMENTUM_X]
+    cp a, 127
+    ; momentum == 127
+    jp z, checkX_end
+    ; momentum < 127
+    jp nc, leftMomentum
+    ; momentum > 127
+    ; Obtener momento real: |momentum - 127| -> momentum - 127
+    ld b, 127
+    sub a, b
+    ld d, a
+
+    ld a, [wBackgroundScroll_X+0]
+	add a, d
+	ld [wBackgroundScroll_X+0], a
+    ld b, a
+	ld a , [wBackgroundScroll_X+1]
+	adc a , 0
+	ld [wBackgroundScroll_X+1], a
     ld c, a
 
     call deEscaleBCtoA
 
-    ld [wBackgroundScroll_Y_real], a
+    ld [wBackgroundScroll_X_real], a
+
+    jp checkX_end
+
+leftMomentum:
+    ; Obtener momento real: |momentum - 127| -> 127 - momentum
+    ld b, a
+    ld a, 127
+    sub a, b
+    ld d, a
+
+    ld a, [wBackgroundScroll_X+0]
+	sub a, d
+	ld [wBackgroundScroll_X+0], a
+    ld b, a
+	ld a , [wBackgroundScroll_X+1]
+	sbc a , 0
+	ld [wBackgroundScroll_X+1], a
+    ld c, a
+
+    call deEscaleBCtoA
+
+    ld [wBackgroundScroll_X_real], a
+
+checkX_end:
+
     ret
-
-
