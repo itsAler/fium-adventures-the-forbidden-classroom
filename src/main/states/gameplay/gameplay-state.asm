@@ -21,7 +21,10 @@ InitGameplayState::
 	xor a
 	ld [rWY], a
 	ld [wBackgroundScroll_X], a
+	ld [wBackgroundScroll_X+1], a
 	ld [wBackgroundScroll_Y], a
+	ld [wBackgroundScroll_Y+1], a
+	
 	ld a, 7
 	ld [rWX], a
 

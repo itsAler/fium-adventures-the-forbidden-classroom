@@ -6,6 +6,7 @@ PLAYER_MOMENTUM_X:: db ; BIT 7: 0 LEFT 1 RIGHT | BIT 6-0: SPEED [0, 127]
 PLAYER_MOMENTUM_Y:: db ; BIT 7: 0 UP 1 DOWN | BIT 6-0: SPEED [0, 127]
 PLAYER_MOMENTUM_INCREMENT:: db
 PLAYER_MOMENTUM_DECREMENT:: db
+DEBUG_10_RIGHT_MOVS:: db
 
 SECTION "GameplayPlayerSection", ROM0
 
@@ -39,10 +40,13 @@ InitializePlayer::
     xor a
     ld [PLAYER_MOMENTUM_X], a
     ld [PLAYER_MOMENTUM_Y], a
+    ; DEBUG
+    ld a, 10
+    ld [DEBUG_10_RIGHT_MOVS], a
 
     ret
 
-
+; Lee inputs, calcula el momento y lo transforma en scroll
 UpdatePlayer::
     call UpdateInputKeys
     call computeMomentum
@@ -53,13 +57,22 @@ UpdatePlayer::
 computeMomentum:
     ; Siempre se decrementa el momento, de tal forma que el personaje vaya perdiendo
     ; velocidad si no hay input por parte del jugador.
+    ; Tener en cuenta el bit de dirección
     ld a, [PLAYER_MOMENTUM_DECREMENT]
     ld b, a
     ld a, [PLAYER_MOMENTUM_X]
+    ld c, a ; Almacenamos la codificación completa para luego recuperar el bit de dirección
+    res 7, a ; Obtener valor real del momento
     sub a, b
     jp nc, .noUnderflowX
     xor a
+
 .noUnderflowX:
+    ; Añadir bit de dirección tras realizar el cálculo
+    bit 7, c
+    jp z, .isLeftMom
+    set 7, a
+.isLeftMom:
     ld [PLAYER_MOMENTUM_X], a
 
     ld a, [PLAYER_MOMENTUM_Y]
@@ -119,11 +132,55 @@ CheckLeft:
     ld [PLAYER_MOMENTUM_X], a
 
 CheckRight:
+    ld a, [DEBUG_10_RIGHT_MOVS] ; DEBUG
+    sub a, 1 ;DEBUG
+    ld [DEBUG_10_RIGHT_MOVS], a ;DEBUG
+    jp nc, forceRight ;DEBUG
+    xor a ;DEBUG
+    ld [DEBUG_10_RIGHT_MOVS], a ;DEBUG
     ld a, [wCurKeys]
     and a, PADF_RIGHT
     jp z, CheckDown
 
-    ;jp moveRight
+forceRight: ;DEBUG
+    ld a, [PLAYER_MOMENTUM_INCREMENT]
+    ld b, a
+    ld a, [PLAYER_MOMENTUM_MAX]
+    ld c, a
+    ld a, [PLAYER_MOMENTUM_X]
+
+    ; En primer lugar, si el momento es 0, establecer el bit de dirección a right
+    cp a, 128
+    jp z, .momIsZero
+    cp a, 0
+    jp z, .momIsZero
+    jp .momNotZero
+
+.momIsZero:
+    set 7, a
+
+.momNotZero:
+    ; Igual que en left
+    bit 7, a           
+    jp z, .notRight
+    res 7, a ; Obtener valor del momento
+    add a, b
+    cp a, c
+    set 7, a ; Volver a establecer la dirección del momento
+    jp c, .rightEnd
+    ld a, [PLAYER_MOMENTUM_MAX]
+    set 7, a ; Volver a establecer la dirección del momento
+
+    jp .rightEnd
+
+.notRight:
+    sub a, b
+    jp nc, .rightEnd
+    xor a
+
+.rightEnd:
+    ld [PLAYER_MOMENTUM_X], a
+
 
 CheckDown:
     ld a, [wCurKeys]
@@ -145,7 +202,6 @@ checkEnd:
 
 ; Convierte el momento del jugador en un desplazamiento de scroll
 momentumToScroll:
-
     ld a, [PLAYER_MOMENTUM_X]
     ld d, a
 
@@ -159,8 +215,8 @@ momentumToScroll:
 	sub a, d
 	ld [wBackgroundScroll_X+0], a
     ld b, a
-	ld a , [wBackgroundScroll_X+1]
-	sbc a , 0
+	ld a, [wBackgroundScroll_X+1]
+	sbc a, 0
 	ld [wBackgroundScroll_X+1], a
     ld c, a
 
@@ -168,13 +224,14 @@ momentumToScroll:
 
 
 .rightMomentum:
-    res 7, d ;  Borrar el bit de dirección para obtener valor del momento
+    res 7, d    ; Borrar el bit de dirección para obtener valor del momento
+
     ld a, [wBackgroundScroll_X+0]
 	add a, d
 	ld [wBackgroundScroll_X+0], a
     ld b, a
-	ld a , [wBackgroundScroll_X+1]
-	adc a , 0
+	ld a, [wBackgroundScroll_X+1]
+	adc a, 0
 	ld [wBackgroundScroll_X+1], a
     ld c, a
 

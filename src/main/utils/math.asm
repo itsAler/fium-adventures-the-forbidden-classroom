@@ -38,6 +38,6 @@ deEscaleBCtoA::
   srl c
   rr b
 
-  ld a,b
+  ld a, b
 
 	ret
