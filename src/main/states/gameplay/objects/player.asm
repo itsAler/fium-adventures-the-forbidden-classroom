@@ -6,7 +6,6 @@ PLAYER_MOMENTUM_X:: db ; BIT 7: 0 LEFT 1 RIGHT | BIT 6-0: SPEED [0, 127]
 PLAYER_MOMENTUM_Y:: db ; BIT 7: 0 UP 1 DOWN | BIT 6-0: SPEED [0, 127]
 PLAYER_MOMENTUM_INCREMENT:: db
 PLAYER_MOMENTUM_DECREMENT:: db
-DEBUG_10_RIGHT_MOVS:: db
 
 SECTION "GameplayPlayerSection", ROM0
 
@@ -28,7 +27,7 @@ InitializePlayer::
     ld [wShadowOAM+1], a  ;X
     xor a
     ld [wShadowOAM+2], a ; TileID
-    ld [wShadowOAM+3], a ; Attr 
+    ld [wShadowOAM+3], a ; Attr
 
     ; Momentum init
     ld a, 40
@@ -40,11 +39,10 @@ InitializePlayer::
     xor a
     ld [PLAYER_MOMENTUM_X], a
     ld [PLAYER_MOMENTUM_Y], a
-    ; DEBUG
-    ld a, 10
-    ld [DEBUG_10_RIGHT_MOVS], a
 
     ret
+
+
 
 ; Lee inputs, calcula el momento y lo transforma en scroll
 UpdatePlayer::
@@ -54,12 +52,15 @@ UpdatePlayer::
 
     ret
 
+
+; Decrementa el momento (rozamiento) y calcula el momento del personaje en base al input del jugador
 computeMomentum:
     ; Siempre se decrementa el momento, de tal forma que el personaje vaya perdiendo
     ; velocidad si no hay input por parte del jugador.
     ; Tener en cuenta el bit de dirección
     ld a, [PLAYER_MOMENTUM_DECREMENT]
     ld b, a
+
     ld a, [PLAYER_MOMENTUM_X]
     ld c, a ; Almacenamos la codificación completa para luego recuperar el bit de dirección
     res 7, a ; Obtener valor real del momento
@@ -76,10 +77,16 @@ computeMomentum:
     ld [PLAYER_MOMENTUM_X], a
 
     ld a, [PLAYER_MOMENTUM_Y]
+    ld c, a
+    res 7, a
     sub a, b
     jp nc, .noUnderflowY
     xor a
 .noUnderflowY:
+    bit 7, c
+    jp z, .isLeftMomY
+    set 7, a
+    .isLeftMomY:
     ld [PLAYER_MOMENTUM_Y], a
 
     ; Computar el momento en base al input
@@ -132,17 +139,10 @@ CheckLeft:
     ld [PLAYER_MOMENTUM_X], a
 
 CheckRight:
-    ld a, [DEBUG_10_RIGHT_MOVS] ; DEBUG
-    sub a, 1 ;DEBUG
-    ld [DEBUG_10_RIGHT_MOVS], a ;DEBUG
-    jp nc, forceRight ;DEBUG
-    xor a ;DEBUG
-    ld [DEBUG_10_RIGHT_MOVS], a ;DEBUG
     ld a, [wCurKeys]
     and a, PADF_RIGHT
     jp z, CheckDown
 
-forceRight: ;DEBUG
     ld a, [PLAYER_MOMENTUM_INCREMENT]
     ld b, a
     ld a, [PLAYER_MOMENTUM_MAX]
@@ -187,14 +187,81 @@ CheckDown:
     and a, PADF_DOWN
     jp z, CheckUp
     
-    ;jp moveDown
+    ld a, [PLAYER_MOMENTUM_INCREMENT]
+    ld b, a
+    ld a, [PLAYER_MOMENTUM_MAX]
+    ld c, a
+    ld a, [PLAYER_MOMENTUM_Y]
+
+    cp a, 128
+    jp z, .momIsZero
+    cp a, 0
+    jp z, .momIsZero
+    jp .momNotZero
+
+.momIsZero:
+    set 7, a
+
+.momNotZero:
+   ; Igual que en right
+    bit 7, a           
+    jp z, .notDown
+    res 7, a ; Obtener valor del momento
+    add a, b
+    cp a, c
+    set 7, a ; Volver a establecer la dirección del momento
+    jp c, .downEnd
+    ld a, [PLAYER_MOMENTUM_MAX]
+    set 7, a ; Volver a establecer la dirección del momento (después de cargar mom_max)
+
+    jp .downEnd
+
+.notDown:
+    sub a, b
+    jp nc, .downEnd
+    xor a
+
+.downEnd:
+    ld [PLAYER_MOMENTUM_Y], a
 
 CheckUp:
     ld a, [wCurKeys]
     and a, PADF_UP
     jp z, checkEnd
 
-    ;jp moveUp
+    ld a, [PLAYER_MOMENTUM_INCREMENT]
+    ld b, a
+    ld a, [PLAYER_MOMENTUM_MAX]
+    ld c, a
+    ld a, [PLAYER_MOMENTUM_Y]
+
+    cp a, 128
+    jp z, .momIsZero
+    cp a, 0
+    jp z, .momIsZero
+    jp .momNotZero
+
+.momIsZero:
+    res 7, a
+
+.momNotZero:
+    bit 7, a           
+    jp nz, .notUp
+    
+    add a, b
+    cp a, c
+    jp c, .upEnd
+    ld a, [PLAYER_MOMENTUM_MAX]
+    res 7, a
+    jp .upEnd
+
+.notUp:
+    sub a, b
+    jp nc, .upEnd
+    xor a
+
+.upEnd:
+    ld [PLAYER_MOMENTUM_Y], a
 
 checkEnd:
     ret
@@ -206,11 +273,10 @@ momentumToScroll:
     ld d, a
 
     ; Comprobar si es movimiento izq o der
-    ; Añadir el momento al entero escalado de scroll
-    ; Obtener valor de scroll real
     bit 7, d
     jp nz, .rightMomentum
 
+    ; Añadir el momento al entero escalado de scroll
     ld a, [wBackgroundScroll_X+0]
 	sub a, d
 	ld [wBackgroundScroll_X+0], a
@@ -220,8 +286,8 @@ momentumToScroll:
 	ld [wBackgroundScroll_X+1], a
     ld c, a
 
+    ; Obtener valor de scroll real y volcar a screen
     jp bg_scroll_x_end
-
 
 .rightMomentum:
     res 7, d    ; Borrar el bit de dirección para obtener valor del momento
@@ -238,5 +304,38 @@ momentumToScroll:
 bg_scroll_x_end:
     call deEscaleBCtoA
     ld [wBackgroundScroll_X_real], a
+
+
+    ld a, [PLAYER_MOMENTUM_Y]
+    ld d, a
+    bit 7, d
+    jp nz, .downMomentum
+
+    ld a, [wBackgroundScroll_Y+0]
+	sub a, d
+	ld [wBackgroundScroll_Y+0], a
+    ld b, a
+	ld a, [wBackgroundScroll_Y+1]
+	sbc a, 0
+	ld [wBackgroundScroll_Y+1], a
+    ld c, a
+
+    jp bg_scroll_y_end
+
+.downMomentum:
+    res 7, d 
+
+    ld a, [wBackgroundScroll_Y+0]
+	add a, d
+	ld [wBackgroundScroll_Y+0], a
+    ld b, a
+	ld a, [wBackgroundScroll_Y+1]
+	adc a, 0
+	ld [wBackgroundScroll_Y+1], a
+    ld c, a
+
+bg_scroll_y_end:
+    call deEscaleBCtoA
+    ld [wBackgroundScroll_Y_real], a
 
     ret

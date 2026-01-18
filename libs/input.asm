@@ -8,6 +8,7 @@ include "src/main/utils/hardware.inc"
 
  SECTION "Input", ROM0
 
+ ; Obtiene los inputs recibidos por el jugador en el frame actual
 UpdateInputKeys::
   ; Poll half the controller
   ld a, P1F_GET_BTN
