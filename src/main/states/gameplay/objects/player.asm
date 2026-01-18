@@ -30,11 +30,11 @@ InitializePlayer::
     ld [wShadowOAM+3], a ; Attr 
 
     ; Momentum init
-    ld a, 20
+    ld a, 40
     ld [PLAYER_MOMENTUM_MAX], a
     ld a, 4
     ld [PLAYER_MOMENTUM_INCREMENT], a
-    ld a, 2
+    ld a, 1
     ld [PLAYER_MOMENTUM_DECREMENT], a
     xor a
     ld [PLAYER_MOMENTUM_X], a
@@ -46,7 +46,9 @@ InitializePlayer::
 UpdatePlayer::
     call UpdateInputKeys
     call computeMomentum
-    call movePlayer momentumToScroll
+    call momentumToScroll
+
+    ret
 
 computeMomentum:
     ; Siempre se decrementa el momento, de tal forma que el personaje vaya perdiendo
@@ -73,13 +75,23 @@ CheckLeft:
     and a, PADF_LEFT
     jp z, CheckRight
 
-    ; Si el bit de dirección es 0 (movimiento izq), añadir momento. En otro caso decrementarlo hasta 0.
     ld a, [PLAYER_MOMENTUM_INCREMENT]
     ld b, a
     ld a, [PLAYER_MOMENTUM_MAX]
     ld c, a
     ld a, [PLAYER_MOMENTUM_X]
 
+    ; En primer lugar, si el momento es 0, establecer el bit de dirección a left
+    cp a, 128
+    jp z, .momIsZero
+    cp a, 0
+    jp z, .momIsZero
+    jp .momNotZero
+
+.momIsZero:
+    res 7, a
+
+.momNotZero:
     ;if(mom.x.dir == left) 
     ;   mom.x.val = (mom.x.val + mom_increment) > mom_max ? mom_max : mom.x.val + mom_increment; 
     ;else {
@@ -131,105 +143,17 @@ checkEnd:
     ret
 
 
-moveLeft:
-	; mBackGroundScroll tiene 2 bytes en little endian: [LSB][MSB] -> 0x[MSB][LSB]
-	; ADC tiene en cuenta si la suma/resta en el LSB ha desbordado y añade/quita 1 en MSB
-	ld a, [wBackgroundScroll_X+0]
-	sub a, [hl]
-	ld [wBackgroundScroll_X+0], a
-    ld b, a
-	ld a , [wBackgroundScroll_X+1]
-	sbc a , 0
-	ld [wBackgroundScroll_X+1], a
-    ld c, a
+; Convierte el momento del jugador en un desplazamiento de scroll
+momentumToScroll:
 
-    call deEscaleBCtoA
-
-    ld [wBackgroundScroll_X_real], a
-
-    ret
-
-moveRight:
-    ld a, [wBackgroundScroll_X+0]
-	add a, [hl]
-	ld [wBackgroundScroll_X+0], a
-    ld b, a
-	ld a , [wBackgroundScroll_X+1]
-	adc a , 0
-	ld [wBackgroundScroll_X+1], a
-    ld c, a
-
-    call deEscaleBCtoA
-
-    ld [wBackgroundScroll_X_real], a
-    ret
-
-moveDown:
-    ret
-
-moveUp:
-    ret
-
-decrementMomentumX:
-    ld a, [PLAYER_MOMENTUM_DECREMENT]
-    ld b, a
     ld a, [PLAYER_MOMENTUM_X]
-    sub a, b
-    jp c, .BelowMin
-    ld [PLAYER_MOMENTUM_X], a
-.BelowMin:
-    xor a
-    ld [PLAYER_MOMENTUM_X], a
-    ret
-
-decrementMomentumY:
-    ld a, [PLAYER_MOMENTUM_DECREMENT]
-    ld b, a
-    ld a, [PLAYER_MOMENTUM_Y]
-    sub a, b
-    jp c, .BelowMin
-    ld [PLAYER_MOMENTUM_Y], a
-.BelowMin:
-    xor a
-    ld [PLAYER_MOMENTUM_Y], a
-    ret
-
-
-; Aplica el momento del jugador en movimiento de scroll en pantalla
-movePlayer:
-    ld a, [PLAYER_MOMENTUM_X]
-    cp a, 127
-    ; momentum == 127
-    jp z, checkX_end
-    ; momentum < 127
-    jp nc, leftMomentum
-    ; momentum > 127
-    ; Obtener momento real: |momentum - 127| -> momentum - 127
-    ld b, 127
-    sub a, b
     ld d, a
 
-    ld a, [wBackgroundScroll_X+0]
-	add a, d
-	ld [wBackgroundScroll_X+0], a
-    ld b, a
-	ld a , [wBackgroundScroll_X+1]
-	adc a , 0
-	ld [wBackgroundScroll_X+1], a
-    ld c, a
-
-    call deEscaleBCtoA
-
-    ld [wBackgroundScroll_X_real], a
-
-    jp checkX_end
-
-leftMomentum:
-    ; Obtener momento real: |momentum - 127| -> 127 - momentum
-    ld b, a
-    ld a, 127
-    sub a, b
-    ld d, a
+    ; Comprobar si es movimiento izq o der
+    ; Añadir el momento al entero escalado de scroll
+    ; Obtener valor de scroll real
+    bit 7, d
+    jp nz, .rightMomentum
 
     ld a, [wBackgroundScroll_X+0]
 	sub a, d
@@ -240,10 +164,22 @@ leftMomentum:
 	ld [wBackgroundScroll_X+1], a
     ld c, a
 
+    jp bg_scroll_x_end
+
+
+.rightMomentum:
+    res 7, d ;  Borrar el bit de dirección para obtener valor del momento
+    ld a, [wBackgroundScroll_X+0]
+	add a, d
+	ld [wBackgroundScroll_X+0], a
+    ld b, a
+	ld a , [wBackgroundScroll_X+1]
+	adc a , 0
+	ld [wBackgroundScroll_X+1], a
+    ld c, a
+
+bg_scroll_x_end:
     call deEscaleBCtoA
-
     ld [wBackgroundScroll_X_real], a
-
-checkX_end:
 
     ret
