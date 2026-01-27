@@ -27,7 +27,7 @@ rand::
   ld b, a
   ret
 
-; Almacena en A el entero real de 1 Byte desde un entero escalado de 2 Bytes en BC.
+; Almacena en A el entero real de 1 Byte desde un entero escalado de 2 Bytes almacenado en BC.
 deEscaleBCtoA::
   srl c
   rr b
