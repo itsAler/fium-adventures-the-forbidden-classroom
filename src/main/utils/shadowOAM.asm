@@ -1,4 +1,3 @@
-
 include "src/main/utils/hardware.inc"
 
 
@@ -8,7 +7,6 @@ SECTION "Shadow OAM", WRAM0, ALIGN[8]
 ; y desde la cual podremos realizar una transferencia DMA.
 wShadowOAM::
     ds 4 * 40 ; Sprite data buffer 40 sprites * 4 bytes
-
 
 SECTION "OAM DMA routine", ROM0
 
@@ -66,3 +64,4 @@ SECTION "OAM DMA", HRAM
 ; Destination: $FE00-$FE9F
 hOAMDMA::
     ds DMARoutineEnd - DMARoutine ; Reservamos espacio para copiar la rutina DMA
+

@@ -1,4 +1,19 @@
-INCLUDE "src/main/utils/hardware.inc"
+; Declaración de objetos
+; Listas de objetos
+; Metasprites
+; Sprite interleaving
+
+include "src/main/utils/hardware.inc"
+
+; struct object {
+;
+;   int weight;
+;   int velocidad_x;
+;   int velocidad_y;
+;   int dir; -> Facing[7-4] Movement[3-0]
+;       facing -> MÁSCARAS: UP DOWN LEFT RIGHT -> Esto sobra
+;       movement: -> MASCARAS: UP DOWN LEFT RIGHT UPLEFT UPRIGHT DOWNLEFT DOWNRIGHT
+;}
 
 SECTION "PlayerVariables", WRAM0
 PLAYER_MOMENTUM_MAX:: db ; SOLO SON UTILIZABLES LOS 7 PRIMEROS BITS: [0, 127]
@@ -6,14 +21,15 @@ PLAYER_MOMENTUM_X:: db ; BIT 7: 0 LEFT 1 RIGHT | BIT 6-0: SPEED [0, 127]
 PLAYER_MOMENTUM_Y:: db ; BIT 7: 0 UP 1 DOWN | BIT 6-0: SPEED [0, 127]
 PLAYER_MOMENTUM_INCREMENT:: db
 PLAYER_MOMENTUM_DECREMENT:: db
+PLAYER_LIVES:: db ; Número de vidas del jugador. 
 
-SECTION "GameplayPlayerSection", ROM0
+SECTION "Object Manager Routines", ROM0
 
-playerTiles: INCBIN "src/generated/sprites/player.2bpp"
-playerTilesEnd:
-
-InitializePlayer::
-    ; Copiar tiles del player
+; Inicializa un objecto en el pool de objetos.
+;
+;   PARÁMETROS:
+;   HL - Dirección del código de inicialización del objeto
+InitializeObject::
 	ld de, playerTiles
 	ld hl, _VRAM8000
 	ld bc, playerTilesEnd - playerTiles ; bc contains how many bytes we have to copy.
@@ -42,6 +58,10 @@ InitializePlayer::
 
     ret
 
+; Tranforma la información almacenada en el pool de objetos en un conjunto de sprites en SOAM
+; listos para ser transferidos mediante DMA. 
+RenderPool::
+    ret
 
 
 ; Lee inputs, calcula el momento y lo transforma en scroll
