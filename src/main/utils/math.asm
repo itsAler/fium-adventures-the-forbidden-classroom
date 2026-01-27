@@ -29,6 +29,9 @@ rand::
 
 ; Almacena en A el entero real de 1 Byte desde un entero escalado de 2 Bytes almacenado en BC.
 deEscaleBCtoA::
+  ; 5 desplazamientos para un movimiento muy suave.
+  srl c
+  rr b
   srl c
   rr b
   srl c
