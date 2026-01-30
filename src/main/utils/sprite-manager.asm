@@ -9,7 +9,6 @@ SECTION "Shadow OAM", WRAM0, ALIGN[8]
 wShadowOAM::
     ds 4 * 40 ; Sprite data buffer 40 sprites * 4 bytes
 
-
 SECTION "OAM DMA routine", ROM0
 
 ; LLamar una vez al inicio del juego. Imprescindible para el funcionamiento

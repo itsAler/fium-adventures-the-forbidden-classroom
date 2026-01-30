@@ -4,7 +4,7 @@ DEF PLAYER_BASE_MOMENTUM_MAX EQU 60
 DEF PLAYER_BASE_MOMENTUM_INC EQU 15
 DEF PLAYER_BASE_MOMENTUM_DEC EQU 1
 
-SECTION "Entity Player", ROM0
+SECTION "Player Entity Metadata", ROM0
 
 playerTiles: INCBIN "src/generated/sprites/player.2bpp"
 playerTilesEnd:

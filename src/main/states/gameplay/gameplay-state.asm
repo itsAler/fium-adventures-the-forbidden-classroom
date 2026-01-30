@@ -1,4 +1,5 @@
 INCLUDE "src/main/utils/hardware.inc"
+INCLUDE "src/main/entities/entity_manager.asm"
 
 SECTION "GameplayVariables", WRAM0
 
@@ -15,6 +16,11 @@ InitGameplayState::
 	call EntityManager_Initialize
 	call SpriteManager_Initialize
 	call PhysicsEngine_Initialize
+	
+	ld a, ENT_TYPE_PLAYER
+	ld h, HIGH(ENTITY_PLAYER_METADATA)
+	ld d, LOW(ENTITY_PLAYER_METADATA)
+	call EntityManager_Create_Entity
 
 	call InitializePlayer
 	ld a, HIGH(wShadowOAM)
