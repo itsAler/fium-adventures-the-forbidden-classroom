@@ -46,10 +46,10 @@ ClearShadowOAM::
     xor a
     ld b, 160
     ld hl, wShadowOAM
-ClearShadowoam:
+.ClearShadowoam:
     ld [hli], a
     dec b
-    jp nz, ClearShadowoam
+    jp nz, .ClearShadowoam
     ret 
 
 
@@ -66,3 +66,9 @@ SECTION "OAM DMA", HRAM
 ; Destination: $FE00-$FE9F
 hOAMDMA::
     ds DMARoutineEnd - DMARoutine ; Reservamos espacio para copiar la rutina DMA
+
+SECTION "Sprite Manager", ROM0
+; Inicializa los parámetros interos del motor de sprites.
+SpriteManager_Initialize::
+    call ClearShadowOAM
+    ret

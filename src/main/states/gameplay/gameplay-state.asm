@@ -12,7 +12,10 @@ SECTION "GameplayState", ROM0
 InitGameplayState::
 
 	call InitializeBackground
-	call ClearShadowOAM
+	call EntityManager_Initialize
+	call SpriteManager_Initialize
+	call PhysicsEngine_Initialize
+
 	call InitializePlayer
 	ld a, HIGH(wShadowOAM)
 	call hOAMDMA
