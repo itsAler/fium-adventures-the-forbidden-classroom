@@ -13,18 +13,17 @@ SECTION "GameplayState", ROM0
 InitGameplayState::
 
 	call InitializeBackground
-	call EntityManager_Initialize
+	call EntityManager_func_initialize
 	call SpriteManager_Initialize
 	call PhysicsEngine_Initialize
 	
 	ld a, ENT_TYPE_PLAYER
-	ld h, HIGH(ENTITY_PLAYER_METADATA)
-	ld d, LOW(ENTITY_PLAYER_METADATA)
-	call EntityManager_Create_Entity
+	ld hl, ENT_METADATA_PLAYER
+	call EntityManager_func_create_entity
 
-	call InitializePlayer
-	ld a, HIGH(wShadowOAM)
-	call hOAMDMA
+	;call InitializePlayer
+	;ld a, HIGH(wShadowOAM)
+	;call hOAMDMA
 
 	; Reset window and scroll.
 	xor a
@@ -45,8 +44,7 @@ InitGameplayState::
 
 
 UpdateGameplayState::
-	; Actualizar jugador
-	call UpdatePlayer
+	call EntityManager_func_update
 
 	call WaitForOneVBlankFunction
 	call UpdateBackgroundScroll
