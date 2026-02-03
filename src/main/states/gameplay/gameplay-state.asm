@@ -1,5 +1,4 @@
 INCLUDE "src/main/utils/hardware.inc"
-INCLUDE "src/main/entities/entity_manager.asm"
 
 SECTION "GameplayVariables", WRAM0
 
@@ -17,13 +16,8 @@ InitGameplayState::
 	call SpriteManager_Initialize
 	call PhysicsEngine_Initialize
 	
-	ld a, ENT_TYPE_PLAYER
-	ld hl, ENT_METADATA_PLAYER
-	call EntityManager_func_create_entity
-
-	;call InitializePlayer
-	;ld a, HIGH(wShadowOAM)
-	;call hOAMDMA
+	ld hl, ent_player_init_data
+	call EntityManager_add_entity
 
 	; Reset window and scroll.
 	xor a
@@ -44,20 +38,10 @@ InitGameplayState::
 
 
 UpdateGameplayState::
-	call EntityManager_func_update
+	call EntityManager_update_logic
 
 	call WaitForOneVBlankFunction
-	call UpdateBackgroundScroll
-	ld a, HIGH(wShadowOAM)
-	call hOAMDMA
+
+	call EntityManager_dump_logic
 
 	jp UpdateGameplayState
-
-; Actualización del BGScroll durante vblank
-UpdateBackgroundScroll::
-	ld a, [wBackgroundScroll_Y_real]
-	ld [rSCY], a
-	ld a, [wBackgroundScroll_X_real]
-	ld [rSCX], a
-
-	ret

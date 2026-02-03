@@ -1,21 +1,23 @@
 INCLUDE "src/main/utils/hardware.inc"
+INCLUDE "src/main/utils/constants.inc"
 
-DEF PLAYER_BASE_MOMENTUM_MAX EQU 60
-DEF PLAYER_BASE_MOMENTUM_INC EQU 15
-DEF PLAYER_BASE_MOMENTUM_DEC EQU 1
 
-SECTION "Player Entity Metadata", ROM0
+SECTION "Player Entity", ROM0
 
 playerTiles: INCBIN "src/generated/sprites/player.2bpp"
 playerTilesEnd:
 
-InitializePlayer::
+; Destruye a, de, bc, hl
+ent_player_init_data::
+    push bc ; Contiene la dirección de la entrada a usar en la entityList
+
     ; Copiar tiles del player
 	ld de, playerTiles
 	ld hl, _VRAM8000
 	ld bc, playerTilesEnd - playerTiles ; bc contains how many bytes we have to copy.
     call CopyDEintoMemoryAtHL
 
+    ; TODO Mover al Sprite Manager
     ; Inicializamos la memoria shadowOAM
 	; ESTRUCTURA OAM -> [Y][X][TileIdx][Attributes: (b7:Priority)(b6:yFlip)(b5:xFlip)(b4:DMGPallete)(b3:Bank)(b2-0:CGBPallete)]
     ld a, 32 + 16
@@ -26,32 +28,38 @@ InitializePlayer::
     ld [wShadowOAM+2], a ; TileID
     ld [wShadowOAM+3], a ; Attr
 
-    ; Momentum init
-    ld a, PLAYER_BASE_MOMENTUM_MAX
-    ld [PLAYER_MOMENTUM_MAX], a
-    ld a, PLAYER_BASE_MOMENTUM_INC
-    ld [PLAYER_MOMENTUM_INCREMENT], a
-    ld a, PLAYER_BASE_MOMENTUM_DEC
-    ld [PLAYER_MOMENTUM_DECREMENT], a
+    ; TODO Mover al physics Engine
+    ; Inicializamos los atributos del jugador
+    pop hl ; Recuperamos puntero la entrada en EntityList
+
     xor a
-    ld [PLAYER_MOMENTUM_X], a
-    ld [PLAYER_MOMENTUM_Y], a
+    ld a, ENT_STATUS_VALID | ENT_TYPE_PLAYER
+    ld [hli], a
+    ld a, ENT_PLAYER_INIT_MOMENTUM_MAX
+    ld [hli], a ; MOMENTUM_MAX    
+    ld a, [ENT_PLAYER_INIT_MOMENTUM_INC_DEC]
+    ld [hli], a
+    ld a, [ENT_PLAYER_INIT_HEALTH]
+    ld [hli], a
+    ld a, [ENT_PLAYER_INIT_DAMAGE]
+    ld [hli], a
+    xor a
+    ld [hli], a ; MOMENTUM_X
+    ld [hli], a ; MOMENTUM_Y
+    ld [hli], a ; SCALED_X_HB
+    ld [hli], a ; SCALED_X_LB
+    ld [hli], a ; SCALED_Y_HB
+    ld [hli], a ; SCALED_Y_LB
 
     ret
-
 
 
 ; Lee inputs, calcula el momento y lo transforma en scroll
-UpdatePlayer::
+ent_player_update_logic::
     call UpdateInputKeys
-    call computeMomentum
-    call momentumToScroll
 
-    ret
+    ; Decrementa el momento (rozamiento) y calcula el momento del personaje en base al input del jugador
 
-
-; Decrementa el momento (rozamiento) y calcula el momento del personaje en base al input del jugador
-computeMomentum:
     ; Siempre se decrementa el momento, de tal forma que el personaje vaya perdiendo
     ; velocidad si no hay input por parte del jugador.
     ; Tener en cuenta el bit de dirección
@@ -261,11 +269,8 @@ CheckUp:
     ld [PLAYER_MOMENTUM_Y], a
 
 checkEnd:
-    ret
-
 
 ; Convierte el momento del jugador en un desplazamiento de scroll
-momentumToScroll:
     ld a, [PLAYER_MOMENTUM_X]
     ld d, a
 

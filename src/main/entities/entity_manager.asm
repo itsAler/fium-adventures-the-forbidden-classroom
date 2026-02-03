@@ -1,52 +1,18 @@
 ; El entity manager es el encargado de gestionar
-; La creación y destrucción de nuevas entidades.
+; La creación y destrucción de nuevas entidades,
+; y se encarga de disparar la actualización
+; de la lógica de las entidades en cada ciclo.
+
 ; Funciona reservando un espacio de memoria fijo.
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ENTITY ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-;   1B FLAGS [7: STATUS] [6-3: ENT_TYPE] [2-0: UNUSED]
-;       STATUS:     Estado actual de la entrada (inválida, válida)
-;       ENT_TYPE:   Tipo de la entidad (jugador, enemigo...)
-;       INITIALIZED: La entidad acaba de crearse o ha sido colocada ya en el mundo.
-;       EFECTS:      Efecto aplicado sobre la entidad (daño, fuego, hielo...)
-;   1B MOMENTUM_MAX [0-127]
-;   1B MOMENTUM_X   (BIT 7) DIRECTION: 0 LEFT 1 RIGHT | (BIT 6-0): SPEED [0, 127]
-;   1B MOMENTUM_Y   (BIT 7) DIRECTION: 0 UP 1 DOWN | (BIT 6-0): SPEED [0, 127]
-;   1B MOMENTUM_INC (BIT 7-4) [0, 127] | MOMENTUM_DEC (BIT 3-0) [0, 127]
-;   1B HEALTH [0, 255]
-;   1B DAMAGE [0, 255]
-;   2B SCALED_X
-;   2B SCALED_Y
-;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-DEF ENT_SZ  EQU 11
-DEF ENT_LIST_MAX EQU 4 ; Límite actual de 256 entidades
-; Atributos y máscaras
-DEF ENT_FLAG_STATUS         EQU %10000000
-DEF ENT_STATUS_VALID        EQU %10000000
-DEF ENT_STATUS_INVALID      EQU %00000000
-DEF ENT_FLAG_TYPE           EQU %01111000
-DEF ENT_TYPE_PLAYER         EQU %00000000
-DEF ENT_TYPE_CHEST          EQU %00001000
-DEF ENT_TYPE_ENEMY          EQU %00010000
-DEF ENT_TYPE_BOMB           EQU %00011000
-; Offsets de cada atributo
-DEF ENT_FLAGS               EQU 0
-DEF ENT_MOMENTUM_MAX        EQU 1
-DEF ENT_MOMENTUM_X          EQU 2
-DEF ENT_MOMENTUM_Y          EQU 3
-DEF ENT_MOMENTUM_INC_DEC    EQU 4
-DEF ENT_HEALTH              EQU 5
-DEF ENT_DAMAGE              EQU 6
-DEF ENT_SCALED_X            EQU 7
-DEF ENT_SCALED_Y            EQU 9
+include "src/main/utils/constants.inc"
 
 SECTION "Entity List", WRAM0
 ; Número de huecos libres en la lista de entidades.
 EntityListRemaining: DB
-;Dirección 2B en little endian al siguiente hueco libre en la lista de entidades.
-ptr_next_free: DW
+;Dirección 2B en little endian
+ENT_LIST_PTR_LB: DB
+ENT_LIST_PTR_HB: DB
 ; Reservamos memoria para la EL.
 EntityListStart:: DS ENT_SZ * ENT_LIST_MAX
 EntityListEnd::
@@ -58,97 +24,104 @@ EntityManager_func_initialize::
     ld [EntityListRemaining], a
 
     ld a, LOW(EntityListStart)
-    ld [ptr_next_free], a
+    ld [ENT_LIST_PTR_LB], a
     ld a, HIGH(EntityListStart)
-    ld [ptr_next_free + 1], a
+    ld [ENT_LIST_PTR_HB], a
     ret
 
-; Inicializa una entidad.
+; Intenta inicializar una entidad en la tabla de entidades
+; dada la dirección de memoria del código que inicializa
+; sus atributos.
+:
+; create_entity(hl = entity* init_data) returns none;
 ;
-; create_entity(a = ENT_TYPE) returns none;
-;
-; Destruye: a, b, hl.
-EntityManager_func_create_entity::
-    ld b, a
+; Destruye: a, b, hl, de.
+EntityManager_add_entity::
     ; Comprobar si quedan entradas libres
     ld a, [EntityListRemaining]
     cp 0
     ret z
 
-    ; Decrementar contador
+    ; Decrementar número de entradas libres
     dec a
     ld [EntityListRemaining], a
 
-    ; Inicializar la nueva entrada.
-    ld a, ENT_STATUS_VALID
-    or b ; ENT_TYPE
-    ld [ptr_next_free + ENT_FLAGS], a
+    ; Obtener entrada de la tabla donde almacenar la nueva entidad
+    ld a, [ENT_LIST_PTR_HB]
+    ld b, a
+    ld a, [ENT_LIST_PTR_LB]
+    ld c, a
 
-    ; Obtener la siguiente entrada libre, si es que quedan huecos
+    ; Buscar de manera circular y dejar en DE
+    ; la siguiente entrada libre, si existiera.
     ld a, [EntityListRemaining]
     cp 0
-    ret z
+    jr z, .isFull
 
-    ; Buscar de manera circular en la lista
+    ld a, [ENT_LIST_PTR_HB]
+    ld d, a
+    ld a, [ENT_LIST_PTR_LB]
+    ld e, a
+
 .searchLoop:
-    call get_next
-    ; HL =< EntityListEnd implica
-    ; H < HIGH(EntityListEnd) OR (H = HIGH(EntityListEnd) AND L =< LOW(EntityListEnd) )
+    ld a, ENT_SZ
+    add e
+    ld e, a
+    ld a, d
+    adc 0 
+    ld d, a
 
+    ; Comprobar si la nueva entrada está en los límites de la lista
+    ; HL =< EntityListEnd --> H < HIGH(EntityListEnd) OR 
+    ; (H = HIGH(EntityListEnd) AND L =< LOW(EntityListEnd))
     ld a, HIGH(EntityListEnd)
-    cp h
+    cp d
     jr c, .isLess
-    jr nz, .isGreatherMSB
+    jr nz, .isGreather
 
     ld a, LOW(EntityListEnd)
-    cp l
+    cp e
     jr nc, .isLess
 
 .isGreather:
-    ld hl, EntityListStart
+    ld de, EntityListStart
 
 .isLess:
     ; Comprobar si el hueco está disponible  
-    ld a, [hl + ENT_FLAGS]
+    ld a, [de]
     and ENT_FLAG_STATUS
     cp ENT_STATUS_VALID
     jr z, .searchLoop
 
-    ; Guardar el hueco libre como el siguiente a utilizar
-    ld a, l
-    ld [ptr_next_free], a
-    ld a, h
-    ld [ptr_next_free + 1] a
+    ; Guardar la dirección de la nueva entrada sin usar
+    ld a, d
+    ld [ENT_LIST_PTR_HB], a
+    ld a, e
+    ld [ENT_LIST_PTR_LB], a
 
-    ret
+.isFull:
+    ; Inicializar la nueva entrada.
+    jp hl ; Dirección con el código de inicialización de la entidad
 
-; Destruye una entidad
-;
-; destroy_entity( hl = entity* e) returns none;
-EntityManager_func_destroy_entity::
-    xor a
-    ld [HL], a
+    ; RET implícito desde dicho código.
 
-    ld a, [EntityListRemaining]
-    inc a
-    ld [EntityListRemaining], a
 
-    ; Establecer el nuevo hueco como el siguiente.
-    ld a, LOW(HL)
-    ld [ptr_next_free], a
-    ld a, HIGH(HL)
-    ld [ptr_next_free + 1], a    
-    ret
-
+    
 ; Invalida todas las entradas de la lista de entidades.
 ;
 ; clear_all() returns none;
 ;
 ; Destruye: a, b, hl
-EntityManager_func_clear_all::
+EntityManager_clear_all::
 
     ld b, ENT_LIST_MAX 
     ld hl, EntityListStart 
+
+    ; Resetear el puntero a la siguiente entrada libre.
+    ld a, h
+    ld [ENT_LIST_PTR_HB], a
+    ld a, l
+    ld [ENT_LIST_PTR_LB], a
 
 .loop:
     ld [hl], ENT_STATUS_INVALID
@@ -165,11 +138,12 @@ EntityManager_func_clear_all::
 ;
 ; update() returns none;
 ;
-EntityManager_func_update::
+EntityManager_update_logic::
     ld hl, EntityListStart
     ld b, ENT_LIST_MAX
 
-    ; Actualizar la lógica del jugador, que siempre es la primera entidad en la lista
+    ; Actualizar la lógica del jugador, que siempre es la primera entidad en la lista.
+    call ent_player_func_update_logic
     
 .loop:
     call get_next
@@ -177,42 +151,60 @@ EntityManager_func_update::
     dec b
     xor a
     cp b
-    jr nc, .end:
+    jr nc, .end
     
-    ld a, [hl + ENT_FLAGS]
+    ; Comprobar si la entrada está en uso.
+    ld a, [hl]
     and ENT_FLAG_STATUS
     cp ENT_STATUS_VALID
     jr nz, .loop
 
-    ; Comprobar el tiempo de la entidad.
+    ; Comprobar el tipo de la entidad.
     ; Saltar a la dirección de memoria de comienzo de la actualización de su lógica.
-    
-    ld a, [hl + ENT_FLAGS]
+    ld a, [hl]
     and ENT_FLAG_TYPE
 
-    cp, ENT_TYPE_BOMB
+    cp ENT_TYPE_BOMB
     jr nz, .checkEnemy
     ; Lógica de la bomba
     jr .loop
 
 .checkEnemy:
-    cp, ENT_TYPE_ENEMY
+    cp ENT_TYPE_ENEMY
     jr nz, .checkChest
     ; Lógica del enemigo
     jr .loop
 
 .checkChest
-    cp, ENT_TYPE_CHEST
+    cp ENT_TYPE_CHEST
     ; Lógica del cofre
     jr nz, .loop
 
 .end:
     ret
 
+; Vuelca a los registros reales de OAM y LCD los valores actualizados.
+;
+; dump_logic() returns none;
+;
+; Solo debe ser llamada durante VBlank.
+EntityManager_dump_logic::
+    ; Actualización del BGScroll durante vblank
+	ld a, [wBackgroundScroll_Y_real]
+	ld [rSCY], a
+	ld a, [wBackgroundScroll_X_real]
+	ld [rSCX], a
+
+    ; Actualización de la OAM
+    ld a, HIGH(wShadowOAM)
+	call hOAMDMA
+
+	ret
+
 
 ; Obtiene el comienzo del siguiente elemento de la lista
 ;
-; get_next(hl = entity* previous) returns hl;
+; get_next(hl = entity_table* previous) returns hl;
 ;
 ; Destruye; a, hl.
 get_next:
