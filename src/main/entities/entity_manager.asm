@@ -151,7 +151,7 @@ EntityManager_update_logic::
     dec b
     xor a
     cp b
-    jr nc, .end
+    ret nc
     
     ; Comprobar si la entrada está en uso.
     ld a, [hl]
@@ -160,28 +160,35 @@ EntityManager_update_logic::
     jr nz, .loop
 
     ; Comprobar el tipo de la entidad.
-    ; Saltar a la dirección de memoria de comienzo de la actualización de su lógica.
+    ; Saltar a la dirección de memoria de comienzo del algoritmo implementa su lógica.
     ld a, [hl]
     and ENT_FLAG_TYPE
+    ; El orden de comprobación que da el menor 
+    ; número de fallos, y que por tanto evita comprobaciones es: 
+    ; enemigos > objetos interactuables > bomb > player.
 
-    cp ENT_TYPE_BOMB
-    jr nz, .checkEnemy
-    ; Lógica de la bomba
-    jr .loop
-
-.checkEnemy:
     cp ENT_TYPE_ENEMY
     jr nz, .checkChest
-    ; Lógica del enemigo
+    ; TODO: Implementar lógica enemigo
     jr .loop
 
-.checkChest
+.checkChest:
     cp ENT_TYPE_CHEST
-    ; Lógica del cofre
-    jr nz, .loop
+    jr nz, .checkBomb
+    ; TODO implementar lógica cofre
+    jr. loop
 
-.end:
-    ret
+.checkBomb:
+    cp ENT_TYPE_BOMB
+    jr nz, .isPlayer
+    ; TODO: Implementar lógica enemigo
+    jr .loop
+
+.isPlayer:
+    call ent_player_update_logic
+    jr .loop
+
+
 
 ; Vuelca a los registros reales de OAM y LCD los valores actualizados.
 ;

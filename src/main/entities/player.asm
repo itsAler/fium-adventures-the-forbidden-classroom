@@ -54,7 +54,11 @@ ent_player_init_data::
     ret
 
 
-; Lee inputs, calcula el momento y lo transforma en scroll
+; Lee inputs, calcula el momento del jugador y lo transforma en scroll
+;
+; update_logic(hl = entity_list* player) returns none;
+;
+; Destruye: 
 ent_player_update_logic::
     call UpdateInputKeys
 
