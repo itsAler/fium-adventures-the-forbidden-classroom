@@ -1,4 +1,3 @@
-; ANCHOR: memory-utils
 SECTION "MemoryUtilsSection", ROM0
 
 CopyDEintoMemoryAtHL::
@@ -21,4 +20,4 @@ CopyDEintoMemoryAtHL_With52Offset::
 	or c
 	jp nz, CopyDEintoMemoryAtHL_With52Offset ; Jump to COpyTiles, if the z flag is not set. (the last operation had a non zero result)
 	ret
-; ANCHOR_END: memory-utils
+
