@@ -1,0 +1,13 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{host@alex:\PYGZsh{}/codigo/T\PYGZus{}2\PYGZus{}OpenMP\PYGZus{}ejemplos\PYGZdl{} }./ejemplo\PYGZus{}flush\PYGZus{}2
+\PYG{g+go}{Thread 1, esperando primer dato tecleado por usuario:}
+\PYG{g+go}{Hilo 0 esperando para sumar.}
+\PYG{g+go}{Hilo 2 esperando para mostrar resultado.}
+\PYG{g+go}{10}
+\PYG{g+go}{Thread 1, esperando segundo dato tecleado por usuario:}
+\PYG{g+go}{5}
+\PYG{g+go}{Thread 1, ha puesto en común los datos: 10 y 5}
+\PYG{g+go}{Thread: 2, mostrando el resultado de la operación: 15}
+\PYG{g+go}{Thread 0, sumando 10 y 5 notificados por flag.}
+\PYG{g+gp}{host@alex:\PYGZsh{}/codigo/T\PYGZus{}2\PYGZus{}OpenMP\PYGZus{}ejemplos\PYGZdl{}}
+\end{MintedVerbatim}

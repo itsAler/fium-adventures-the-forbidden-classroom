@@ -1,0 +1,12 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{host@alex:\PYGZsh{}/codigo/T\PYGZus{}2\PYGZus{}OpenMP\PYGZus{}ejemplos\PYGZdl{} }./ejemplo\PYGZus{}nested
+\PYG{g+go}{Hello from thread 1 out of 2}
+\PYG{g+go}{        Numero de threads actuales = 2}
+\PYG{g+go}{            Hello from thread 1 out of 1}
+\PYG{g+go}{                numero de threads actuales = 1}
+\PYG{g+go}{Hello from thread 2 out of 2}
+\PYG{g+go}{        Numero de threads actuales = 2}
+\PYG{g+go}{            Hello from thread 1 out of 1}
+\PYG{g+go}{                numero de threads actuales = 1}
+\PYG{g+gp}{host@alex:\PYGZsh{}/codigo/T\PYGZus{}2\PYGZus{}OpenMP\PYGZus{}ejemplos\PYGZdl{}}
+\end{MintedVerbatim}

@@ -1,0 +1,8 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{host@alex:\PYGZsh{}/codigo/T\PYGZus{}2\PYGZus{}OpenMP\PYGZus{}ejemplos\PYGZdl{} }./programa
+\PYG{g+go}{Thread 0, esperando dato tecleado por usuario:}
+\PYG{g+go}{ANTES: Thread 1, dato a procesar = 32737. Esperando dato desde el otro thread..}
+\PYG{g+go}{DESPUES: Thread 1: dato a procesar = 32737}
+\PYG{g+go}{5}
+\PYG{g+go}{Thread 0, ha puesto en común el dato tecleado por el usuario: 5}
+\end{MintedVerbatim}

@@ -1,0 +1,6 @@
+host@alex:#/proyectos/practicas-PAM-25-26/p2$ ./dist/MulMat 1024 2048 1024 1024 2048 2048 20 12
+Secuencial y paralelo dan el mismo resultado.
+Secuencial: 11.930115.
+Paralelo: 0.109989.
+Ganancia de rendimiento del 10746.65%.
+host@alex:#/proyectos/practicas-PAM-25-26/p2$

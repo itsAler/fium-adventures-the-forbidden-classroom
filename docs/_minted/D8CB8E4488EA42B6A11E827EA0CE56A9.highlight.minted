@@ -1,0 +1,36 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{k+kt}{void}\PYG{+w}{ }\PYG{n+nf}{multiplicarMatrizTareas}\PYG{p}{(}\PYG{k+kt}{double}\PYG{+w}{ }\PYG{o}{*}\PYG{n}{m1}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{o}{*}\PYG{n}{m2}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{o}{*}\PYG{n}{mRes}\PYG{+w}{ }\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{ld1}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{ld2}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{ld3}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{size\PYGZus{}t}\PYG{+w}{ }\PYG{n}{sz\PYGZus{}mRes}\PYG{p}{)\PYGZob{}}
+\PYG{+w}{    }\PYG{k+kt}{size\PYGZus{}t}\PYG{+w}{ }\PYG{n}{filas}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{sz\PYGZus{}mRes}\PYG{+w}{ }\PYG{o}{/}\PYG{+w}{ }\PYG{n}{ld3}\PYG{p}{;}
+\PYG{+w}{    }\PYG{k+kt}{size\PYGZus{}t}\PYG{+w}{ }\PYG{n}{fila}\PYG{p}{;}
+\PYG{+w}{    }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{o}{*}\PYG{n}{sub\PYGZus{}m1}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{m1}\PYG{p}{;}
+\PYG{+w}{    }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{o}{*}\PYG{n}{sub\PYGZus{}mRes}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{mRes}\PYG{p}{;}
+\PYG{+w}{    }\PYG{k+kt}{size\PYGZus{}t}\PYG{+w}{ }\PYG{n}{sz\PYGZus{}sub\PYGZus{}m}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{F}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{ld3}\PYG{p}{;}\PYG{+w}{ }\PYG{c+c1}{// El número de elementos de la submatriz a calcular define el número de filas.}
+
+\PYG{+w}{    }\PYG{k}{for}\PYG{p}{(}\PYG{n}{fila}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{fila}\PYG{o}{+}\PYG{n}{F}\PYG{+w}{ }\PYG{o}{\PYGZlt{}}\PYG{+w}{ }\PYG{n}{filas}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{fila}\PYG{o}{+=}\PYG{n}{F}\PYG{p}{)\PYGZob{}}
+\PYG{+w}{        }\PYG{c+cp}{\PYGZsh{}pragma omp task shared(m1, m2, mRes) firstprivate(sub\PYGZus{}m1, sub\PYGZus{}mRes, sz\PYGZus{}sub\PYGZus{}m, ld1, ld2, ld3)}
+\PYG{+w}{        }\PYG{p}{\PYGZob{}}
+\PYG{+w}{        }\PYG{n}{multiplicarMatriz}\PYG{p}{(}\PYG{n}{sub\PYGZus{}m1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{m2}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{sub\PYGZus{}mRes}\PYG{+w}{ }\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ld1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ld2}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ld3}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{sz\PYGZus{}sub\PYGZus{}m}\PYG{p}{);}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{        }\PYG{n}{sub\PYGZus{}m1}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{F}\PYG{o}{*}\PYG{n}{ld1}\PYG{p}{;}
+\PYG{+w}{        }\PYG{n}{sub\PYGZus{}mRes}\PYG{+w}{ }\PYG{o}{+=}\PYG{+w}{ }\PYG{n}{F}\PYG{o}{*}\PYG{n}{ld3}\PYG{p}{;}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{    }\PYG{c+c1}{// Calcular las últimas filas, ya que la última iteración podría no ser}
+\PYG{+w}{    }\PYG{c+c1}{// múltiplo de F.}
+\PYG{+w}{    }\PYG{n}{sz\PYGZus{}sub\PYGZus{}m}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{filas}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{+w}{ }\PYG{n}{fila}\PYG{p}{)}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{ld3}\PYG{p}{;}
+
+\PYG{+w}{    }\PYG{c+c1}{// Si no hay filas, tampoco hay elementos a calcular, por lo que la siguiente llamada no hace nada:}
+\PYG{+w}{    }\PYG{n}{multiplicarMatriz}\PYG{p}{(}\PYG{n}{sub\PYGZus{}m1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{m2}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{sub\PYGZus{}mRes}\PYG{+w}{ }\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ld1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ld2}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{ld3}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{sz\PYGZus{}sub\PYGZus{}m}\PYG{p}{);}
+
+\PYG{p}{\PYGZcb{}}
+
+\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n+nf}{compararMatrices}\PYG{p}{(}\PYG{k+kt}{double}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{m1}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{double}\PYG{+w}{ }\PYG{o}{*}\PYG{+w}{ }\PYG{n}{m2}\PYG{p}{,}\PYG{+w}{ }\PYG{k+kt}{size\PYGZus{}t}\PYG{+w}{ }\PYG{n}{sz\PYGZus{}m}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{    }\PYG{k}{for}\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{i}\PYG{o}{=}\PYG{l+m+mi}{0}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{o}{\PYGZlt{}}\PYG{n}{sz\PYGZus{}m}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{i}\PYG{o}{++}\PYG{p}{)\PYGZob{}}
+\PYG{+w}{        }\PYG{k}{if}\PYG{p}{(}\PYG{n}{m1}\PYG{p}{[}\PYG{n}{i}\PYG{p}{]}\PYG{o}{!=}\PYG{n}{m2}\PYG{p}{[}\PYG{n}{i}\PYG{p}{])\PYGZob{}}
+\PYG{+w}{            }\PYG{k}{return}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{;}
+\PYG{+w}{        }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{p}{\PYGZcb{}}
+\PYG{+w}{    }\PYG{k}{return}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+\end{MintedVerbatim}

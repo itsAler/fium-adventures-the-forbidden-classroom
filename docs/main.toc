@@ -1,0 +1,15 @@
+\babel@toc {spanish}{}\relax 
+\contentsline {section}{\numberline {1}Ejercicio 1}{2}{section.1}%
+\contentsline {section}{\numberline {2}Ejercicio 2}{2}{section.2}%
+\contentsline {section}{\numberline {3}Ejercicio 3}{3}{section.3}%
+\contentsline {section}{\numberline {4}Ejercicio 4}{3}{section.4}%
+\contentsline {section}{\numberline {5}Ejercicio 5}{4}{section.5}%
+\contentsline {section}{\numberline {6}Ejercicio 6}{4}{section.6}%
+\contentsline {section}{\numberline {7}Ejercicio 7}{6}{section.7}%
+\contentsline {section}{\numberline {8}Ejercicio 8}{7}{section.8}%
+\contentsline {section}{\numberline {9}Ejercicio 9}{8}{section.9}%
+\contentsline {section}{\numberline {10}Ejercicio 10}{9}{section.10}%
+\contentsline {section}{\numberline {11}Ejercicio 11}{11}{section.11}%
+\contentsline {section}{\numberline {12}Ejercicio 12}{14}{section.12}%
+\contentsline {section}{\numberline {13}Ejercicio 13}{17}{section.13}%
+\contentsline {section}{\numberline {14}Ejercicio 14}{20}{section.14}%

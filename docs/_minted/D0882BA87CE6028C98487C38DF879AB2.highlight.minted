@@ -1,0 +1,44 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{c+cp}{\PYGZsh{}include}\PYG{+w}{ }\PYG{c+cpf}{\PYGZlt{}omp.h\PYGZgt{}}
+\PYG{c+cp}{\PYGZsh{}include}\PYG{+w}{ }\PYG{c+cpf}{\PYGZlt{}stdio.h\PYGZgt{}}
+\PYG{c+cp}{\PYGZsh{}include}\PYG{+w}{ }\PYG{c+cpf}{\PYGZlt{}stdlib.h\PYGZgt{}}
+
+\PYG{k+kt}{long}\PYG{+w}{ }\PYG{n+nf}{comp\PYGZus{}fib\PYGZus{}numbers}\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{n}\PYG{p}{)\PYGZob{}}
+\PYG{+w}{	}\PYG{k+kt}{long}\PYG{+w}{ }\PYG{n}{fnm1}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{fnm2}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{fn}\PYG{p}{;}
+\PYG{+w}{	}\PYG{k+kt}{int}\PYG{+w}{	}\PYG{n}{iam}\PYG{p}{;}
+\PYG{+w}{		}
+\PYG{+w}{	}\PYG{n}{iam}\PYG{o}{=}\PYG{n}{omp\PYGZus{}get\PYGZus{}thread\PYGZus{}num}\PYG{p}{();}
+\PYG{+w}{	}\PYG{c+c1}{// En una región final, estamos ejecutando en el mismo hilo.}
+\PYG{+w}{	}\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{omp\PYGZus{}in\PYGZus{}final}\PYG{p}{())\PYGZob{}}
+\PYG{+w}{		}\PYG{n}{printf}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}[SEQ][T\PYGZpc{}d] Ejecutando fibo(\PYGZpc{}d).}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{iam}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{n}\PYG{p}{);}
+\PYG{+w}{	}\PYG{p}{\PYGZcb{}}\PYG{+w}{ }\PYG{k}{else}\PYG{+w}{ }\PYG{p}{\PYGZob{}}
+\PYG{+w}{		}\PYG{n}{printf}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}[PAR][T\PYGZpc{}d] Ejecutando fibo(\PYGZpc{}d).}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{\PYGZdq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{iam}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{n}\PYG{p}{);}
+\PYG{+w}{	}\PYG{p}{\PYGZcb{}}
+
+\PYG{+w}{	}\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{+w}{ }\PYG{n}{n}\PYG{+w}{ }\PYG{o}{==}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{+w}{ }\PYG{o}{||}\PYG{+w}{ }\PYG{n}{n}\PYG{+w}{ }\PYG{o}{==}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{+w}{ }\PYG{p}{)}
+\PYG{+w}{			}\PYG{k}{return}\PYG{p}{(}\PYG{n}{n}\PYG{p}{);}
+\PYG{+w}{	}\PYG{c+c1}{// Si el n es menor que 5, se ejecuta en la misma tarea y en una región tipo \PYGZdq{}final\PYGZdq{}, donde no se crean nuevas tareas en paralelo.}
+\PYG{+w}{	}\PYG{c+cp}{\PYGZsh{}pragma omp task shared(fnm1) final(n \PYGZlt{} 5)}
+\PYG{+w}{	}\PYG{p}{\PYGZob{}}
+\PYG{+w}{	}\PYG{n}{fnm1}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{comp\PYGZus{}fib\PYGZus{}numbers}\PYG{p}{(}\PYG{n}{n}\PYG{l+m+mi}{\PYGZhy{}1}\PYG{p}{);}
+\PYG{+w}{	}\PYG{p}{\PYGZcb{}}
+\PYG{+w}{					}
+\PYG{+w}{	}\PYG{c+cp}{\PYGZsh{}pragma omp task shared(fnm2) final(n \PYGZlt{} 5)}
+\PYG{+w}{	}\PYG{p}{\PYGZob{}}
+\PYG{+w}{	}\PYG{n}{fnm2}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{comp\PYGZus{}fib\PYGZus{}numbers}\PYG{p}{(}\PYG{n}{n}\PYG{l+m+mi}{\PYGZhy{}2}\PYG{p}{);}
+\PYG{+w}{	}\PYG{p}{\PYGZcb{}}
+\PYG{+w}{							}
+\PYG{+w}{	}\PYG{c+cp}{\PYGZsh{}pragma omp taskwait}
+\PYG{+w}{	}\PYG{n}{fn}\PYG{+w}{ }\PYG{o}{=}\PYG{+w}{ }\PYG{n}{fnm1}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{fnm2}\PYG{p}{;}
+\PYG{+w}{								}
+\PYG{+w}{	}\PYG{k}{return}\PYG{p}{(}\PYG{n}{fn}\PYG{p}{);}
+\PYG{p}{\PYGZcb{}}
+\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n+nf}{main}\PYG{p}{(}\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{argc}\PYG{p}{,}\PYG{k+kt}{char}\PYG{+w}{ }\PYG{o}{*}\PYG{n}{argv}\PYG{p}{[])}
+\PYG{p}{\PYGZob{}}
+\PYG{+w}{  }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{n}\PYG{o}{=}\PYG{l+m+mi}{8}\PYG{p}{;}
+\PYG{+w}{  }\PYG{k+kt}{int}\PYG{+w}{ }\PYG{n}{nthreads}\PYG{p}{;}
+\PYG{+w}{  }\PYG{k+kt}{long}\PYG{+w}{	}\PYG{n}{result}\PYG{p}{;}
+\PYG{+w}{  }\PYG{k+kt}{int}\PYG{+w}{	}\PYG{n}{iam}\PYG{p}{;}
+
+\PYG{+w}{  }\PYG{k}{if}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{argc}\PYG{o}{\PYGZgt{}}\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{n}\PYG{o}{=}\PYG{n}{atoi}\PYG{p}{(}\PYG{n}{argv}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]);}
+\end{MintedVerbatim}

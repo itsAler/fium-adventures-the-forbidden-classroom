@@ -1,0 +1,103 @@
+\ProvidesPackage{estilosumu}
+
+% ----------------------------------------------------------------------
+% Paquetes base
+% ----------------------------------------------------------------------
+\RequirePackage[utf8]{inputenc}     % Codificación
+\RequirePackage[spanish]{babel}      % Idioma
+\RequirePackage{graphicx}            % Imágenes
+\RequirePackage[table,xcdraw]{xcolor} % Extensiones de color en tablas
+
+% ----------------------------------------------------------------------
+% Geometría y maquetación
+% ----------------------------------------------------------------------
+\RequirePackage[a4paper,
+  top    = 3.50cm,
+  bottom = 3.50cm,
+  left   = 3.00cm,
+  right  = 2.50cm]{geometry}
+
+\RequirePackage{fancyhdr}
+\pagestyle{fancy}
+
+\fancyheadoffset{0 cm}
+\setlength{\headheight}{15.71667pt}
+\addtolength{\topmargin}{-0.39893pt}
+
+% ----------------------------------------------------------------------
+% Listados de código: listings + minted + tcolorbox
+% ----------------------------------------------------------------------
+\RequirePackage{listings}
+\RequirePackage{minted}
+\RequirePackage{csquotes}            % Comillas tipográficas
+\RequirePackage[most]{tcolorbox}
+\tcbuselibrary{minted}
+\RequirePackage{etoolbox}
+\RequirePackage{verbatim}
+\RequirePackage{subcaption}
+
+% Listado de código en c
+\newtcblisting{cListing}[2][]{
+  listing engine=minted,
+  minted language=c,
+  title=#2,
+  colbacktitle=gray,
+  coltitle=white,          
+  fonttitle=\bfseries,     
+  minted options={
+    fontsize=\small,
+    breaklines,
+  },
+  listing only,
+  #1
+}
+
+% Listado tipo terminal de Bash
+\newtcblisting{terminalListing}[2][]{
+  listing engine=minted,
+  minted language=console,
+  title=#2,
+  colbacktitle=gray,   
+  coltitle=white,         
+  fonttitle=\bfseries,     
+  minted options={
+    style=monokai,
+    fontsize=\small,
+    breaklines,
+  },
+  colback=darkgray,
+  colframe=darkgray,
+  coltext=lightgray,
+  listing only,
+  #1
+}
+
+% tcolorbox por defecto alrededor de cualquier entorno minted
+%\BeforeBeginEnvironment{minted}{\begin{tcolorbox}}
+%\AfterEndEnvironment{minted}{\end{tcolorbox}}
+
+% ----------------------------------------------------------------------
+% Tablas y gráficos
+% ----------------------------------------------------------------------
+\RequirePackage{booktabs}
+\RequirePackage{float}
+\RequirePackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+% ----------------------------------------------------------------------
+% Bibliografía
+% ----------------------------------------------------------------------
+% \RequirePackage{biblatex}
+% \addbibresource{bibliografia.bib}
+
+% ----------------------------------------------------------------------
+% Hipervínculos (último siempre, o empiezan a morir gatitos)
+% ----------------------------------------------------------------------
+\RequirePackage[hidelinks]{hyperref}
+
+% ----------------------------------------------------------------------
+% Ajustes del idioma (nombres de tablas, etc.)
+% ----------------------------------------------------------------------
+\addto\captionsspanish{
+  \renewcommand{\tablename}{Tabla}
+}

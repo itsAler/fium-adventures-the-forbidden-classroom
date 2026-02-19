@@ -1,0 +1,20 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{host@alex:\PYGZsh{}/proyectos/practicas\PYGZhy{}PAM\PYGZhy{}25\PYGZhy{}26/p2\PYGZdl{} }./dist/ejercicio\PYGZus{}fibo\PYGZus{}2\PYG{+w}{ }\PYG{l+m}{10}\PYG{+w}{ }\PYG{p}{|}\PYG{+w}{ }head\PYG{+w}{ }\PYGZhy{}n\PYG{+w}{ }\PYG{l+m}{16}
+\PYG{g+go}{Soy el thread 0}
+\PYG{g+go}{[PAR][T0] Ejecutando fibo(10).}
+\PYG{g+go}{[PAR][T0] Ejecutando fibo(8).}
+\PYG{g+go}{[PAR][T0] Ejecutando fibo(6).}
+\PYG{g+go}{[PAR][T0] Ejecutando fibo(4).}
+\PYG{g+go}{[SEQ][T0] Ejecutando fibo(2).}
+\PYG{g+go}{[SEQ][T0] Ejecutando fibo(1).}
+\PYG{g+go}{[SEQ][T0] Ejecutando fibo(0).}
+\PYG{g+go}{[SEQ][T0] Ejecutando fibo(3).}
+\PYG{g+go}{[SEQ][T0] Ejecutando fibo(2).}
+\PYG{g+go}{[SEQ][T0] Ejecutando fibo(1).}
+\PYG{g+go}{[SEQ][T0] Ejecutando fibo(0).}
+\PYG{g+go}{Soy el thread 3}
+\PYG{g+go}{[PAR][T0] Ejecutando fibo(9).}
+\PYG{g+go}{[PAR][T0] Ejecutando fibo(7).}
+\PYG{g+go}{[SEQ][T0] Ejecutando fibo(1).}
+\PYG{g+gp}{host@alex:\PYGZsh{}/proyectos/practicas\PYGZhy{}PAM\PYGZhy{}25\PYGZhy{}26/p2\PYGZdl{}}
+\end{MintedVerbatim}

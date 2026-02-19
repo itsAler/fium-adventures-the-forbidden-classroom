@@ -1,0 +1,8 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{g+gp}{host@alex:\PYGZsh{}/proyectos/practicas\PYGZhy{}PAM\PYGZhy{}25\PYGZhy{}26/p2\PYGZdl{} }./dist/MulMat\PYG{+w}{ }\PYG{l+m}{1024}\PYG{+w}{ }\PYG{l+m}{2048}\PYG{+w}{ }\PYG{l+m}{1024}\PYG{+w}{ }\PYG{l+m}{1024}\PYG{+w}{ }\PYG{l+m}{2048}\PYG{+w}{ }\PYG{l+m}{2048}\PYG{+w}{ }\PYG{l+m}{200}\PYG{+w}{ }\PYG{l+m}{12}
+\PYG{g+go}{Secuencial y paralelo dan el mismo resultado.}
+\PYG{g+go}{Secuencial: 14.971638.}
+\PYG{g+go}{Paralelo: 5.027090.}
+\PYG{g+go}{Ganancia de rendimiento del 197.82\PYGZpc{}.}
+\PYG{g+gp}{host@alex:\PYGZsh{}/proyectos/practicas\PYGZhy{}PAM\PYGZhy{}25\PYGZhy{}26/p2\PYGZdl{}}
+\end{MintedVerbatim}
