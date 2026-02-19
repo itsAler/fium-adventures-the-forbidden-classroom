@@ -12,8 +12,7 @@ SECTION "GameplayState", ROM0
 InitGameplayState::
 
 	call InitializeBackground
-	call EntityManager_func_initialize
-	call SpriteManager_Initialize
+	call EntityManager_init
 	call PhysicsEngine_Initialize
 	
 	ld hl, ent_player_init_data
@@ -31,7 +30,7 @@ InitGameplayState::
 	ld [rWX], a
 
 	; Turn the LCD on
-	ld a, LCDCF_ON  | LCDCF_BGON | LCDCF_OBJON | LCDCF_OBJ16 | LCDCF_BG9800
+	ld a, LCDCF_ON  | LCDCF_BGON | LCDCF_OBJON | LCDCF_OBJ8 | LCDCF_BG9800
 	ld [rLCDC], a
 
     ret

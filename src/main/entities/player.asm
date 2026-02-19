@@ -1,15 +1,30 @@
 INCLUDE "src/main/utils/hardware.inc"
 INCLUDE "src/main/utils/constants.inc"
 
+DEF ENT_PLAYER_INIT_MOMENTUM_MAX        EQU 60
+DEF ENT_PLAYER_INIT_MOMENTUM_INC_DEC    EQU %11110001
+DEF ENT_PLAYER_INIT_HEALTH              EQU 20
+DEF ENT_PLAYER_INIT_DAMAGE              EQU 5
+
+SECTION "player Specific Entity Variables", WRAM0
+ENT_PLAYER_SHOOTING_FRECUENCY:: DB
+ENT_PLAYER_BULLET_VELOCITY:: DB
 
 SECTION "Player Entity", ROM0
 
 playerTiles: INCBIN "src/generated/sprites/player.2bpp"
 playerTilesEnd:
 
+; Inicializa un jugador.
+;
+; init_data(entityList* et_free_space) returns none
 ; Destruye a, de, bc, hl
+;
+;
 ent_player_init_data::
     push bc ; Contiene la dirección de la entrada a usar en la entityList
+
+    call SpriteManager_add_sprite
 
     ; Copiar tiles del player
 	ld de, playerTiles
@@ -59,8 +74,16 @@ ent_player_init_data::
 ; update_logic(hl = entity_list* player) returns none;
 ;
 ; Destruye: 
-ent_player_update_logic::
+ent_player_update::
+
+    ; Obtener input actualizado del jugador
+    ; Calcular el momento en base a dichos input
+    ; Decrementar por rozamiento la inercia
+    ; Comprobar si el jugador ha disparado una bala
+    ; 
+
     call UpdateInputKeys
+
 
     ; Decrementa el momento (rozamiento) y calcula el momento del personaje en base al input del jugador
 

@@ -7,19 +7,60 @@
 
 include "src/main/utils/constants.inc"
 
-SECTION "Entity List", WRAM0
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ENTITY ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+;   1B FLAGS [7: STATUS] [6-3: ENT_TYPE] [2-0: UNUSED]
+;       STATUS:     Estado actual de la entrada (inválida, válida)
+;       ENT_TYPE:   Tipo de la entidad (jugador, enemigo...)
+;   1B MOMENTUM_MAX [0-127]
+;   1B MOMENTUM_INC_DEC [7-4: INCREMENT] [3-0: DECREMENT] 
+;   1B HEALTH [0, 255]
+;   1B DAMAGE [0, 255]
+;   1B MOMENTUM_X   (BIT 7) DIRECTION: 0 LEFT 1 RIGHT | (BIT 6-0): SPEED [0, 127]
+;   1B MOMENTUM_Y   (BIT 7) DIRECTION: 0 UP 1 DOWN | (BIT 6-0): SPEED [0, 127]
+;   2B SCALED_X [0, 65535]
+;   2B SCALED_Y [0, 65535]
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+DEF ENT_SZ  EQU 11
+DEF ENT_LIST_MAX EQU 4 ; Límite actual de 256 entidades
+
+; Atributos y máscaras
+DEF ENT_FLAG_STATUS         EQU %10000000
+DEF ENT_STATUS_VALID        EQU %10000000
+DEF ENT_STATUS_INVALID      EQU %00000000
+DEF ENT_FLAG_TYPE           EQU %01111000
+DEF ENT_TYPE_PLAYER         EQU %00000000
+DEF ENT_TYPE_CHEST          EQU %00001000
+DEF ENT_TYPE_ENEMY          EQU %00010000
+DEF ENT_TYPE_BOMB           EQU %00011000
+DEF ENT_MOMENTUM_INC        EQU %11110000 ; Aplicar 4 desplazamientos hacia la derecha para obtener valor real.
+DEF ENT_MOMENTUM_DEC        EQU %00001111
+DEF ENT_MOMENTUM_INC_DEC    EQU %01111111
+DEF ENT_MOMENTUM_DIR        EQU %10000000
+DEF ENT_DIR_LEFT            EQU %00000000
+DEF ENT_DIR_RIGHT           EQU %10000000
+DEF ENT_DIR_UP              EQU %00000000
+DEF ENT_DIR_DOWN            EQU %10000000
+
+SECTION "Entity Manager temp variables", WRAM0
+ENT_OLD_MOMENTUM_X:: DB
+ENT_OLD_MOMENTUM_Y:: DB
+
+SECTION "Entity List variables", WRAM0
 ; Número de huecos libres en la lista de entidades.
 EntityListRemaining: DB
 ;Dirección 2B en little endian
 ENT_LIST_PTR_LB: DB
 ENT_LIST_PTR_HB: DB
 ; Reservamos memoria para la EL.
-EntityListStart:: DS ENT_SZ * ENT_LIST_MAX
-EntityListEnd::
+EntityListStart: DS ENT_SZ * ENT_LIST_MAX
+EntityListEnd:
 
 SECTION "Entity Manager", ROM0
 ; Inicializa el gestor de entidades.
-EntityManager_func_initialize::
+EntityManager_init::
     ld a, ENT_LIST_MAX
     ld [EntityListRemaining], a
 
@@ -28,12 +69,11 @@ EntityManager_func_initialize::
     ld a, HIGH(EntityListStart)
     ld [ENT_LIST_PTR_HB], a
     ret
-
-; Intenta inicializar una entidad en la tabla de entidades
-; dada la dirección de memoria del código que inicializa
-; sus atributos.
-:
-; create_entity(hl = entity* init_data) returns none;
+; Inicializa una entidad en la tabla de entidades.
+;
+; No se asegura la inicialización si la tabla está llena.
+;
+; create_entity(hl = ent_init_data* data) returns none;
 ;
 ; Destruye: a, b, hl, de.
 EntityManager_add_entity::
@@ -103,7 +143,7 @@ EntityManager_add_entity::
     ; Inicializar la nueva entrada.
     jp hl ; Dirección con el código de inicialización de la entidad
 
-    ; RET implícito desde dicho código.
+    ; RET implícito desde ent_init.
 
 
     
@@ -142,8 +182,9 @@ EntityManager_update_logic::
     ld hl, EntityListStart
     ld b, ENT_LIST_MAX
 
-    ; Actualizar la lógica del jugador, que siempre es la primera entidad en la lista.
-    call ent_player_func_update_logic
+    ; Actualizar la lógica del jugador, asumimos que siempre 
+    ; es la primera entidad en la lista.
+    call ent_player_update
     
 .loop:
     call get_next
