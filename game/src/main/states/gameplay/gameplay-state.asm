@@ -13,7 +13,7 @@ InitGameplayState::
 
 	call InitializeBackground
 	call EntityManager_init
-	call PhysicsEngine_Initialize
+	call InitSprObjLib
 	
 	ld hl, ent_player_init_data
 	call EntityManager_add_entity
@@ -37,10 +37,10 @@ InitGameplayState::
 
 
 UpdateGameplayState::
+	call ResetShadowOAM
 	call EntityManager_update_logic
 
 	call WaitForOneVBlankFunction
-
-	call EntityManager_dump_logic
+	call hOAMDMA
 
 	jp UpdateGameplayState

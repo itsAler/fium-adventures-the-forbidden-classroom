@@ -1,7 +1,7 @@
 ; Tabla de consulta precomputada para el seno.
 ; Ocupa 2B por entrada * 256 posibles ángulos = 512B ROM
-; Se indexa por seno_lookup[angulo] -> addr = seno_lookup + ángulo
-; Donde 1B ángulo [0, 255] -> ángulo [0º, 360º] 
+
+; TODO: Posibles optimizaciones (interpolación lineal o cosas por el estilo)
 
 ; Calculado con https://www.online-python.com/
 ;import math
@@ -12,7 +12,10 @@
 
 SECTION "Sin Lookup Table", ROM0
 
-sin_lookup::
+; seno[ángulo] = DW [-255, 255]
+; Se indexa por seno_lookup[angulo] -> addr = seno_lookup + ángulo
+; Donde 1B ángulo [0, 255] -> ángulo [0º, 360º] 
+sin_lookup_table::
 DW 0
 DW 6
 DW 13

@@ -74,13 +74,12 @@ ent_player_init_data::
 ; update_logic(hl = entity_list* player) returns none;
 ;
 ; Destruye: 
-ent_player_update::
+ent_player_update_logic::
 
     ; Obtener input actualizado del jugador
     ; Calcular el momento en base a dichos input
     ; Decrementar por rozamiento la inercia
     ; Comprobar si el jugador ha disparado una bala
-    ; 
 
     call UpdateInputKeys
 

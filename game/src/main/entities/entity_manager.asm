@@ -173,8 +173,8 @@ EntityManager_clear_all::
 
     jr .loop
 
-; Actualiza la lógica de todas las entidades con 
-;entrada en la lista de entidades
+; Actualiza la lógica de todas las entidades 
+; presentes en la lista de entidades
 ;
 ; update() returns none;
 ;
@@ -184,7 +184,7 @@ EntityManager_update_logic::
 
     ; Actualizar la lógica del jugador, asumimos que siempre 
     ; es la primera entidad en la lista.
-    call ent_player_update
+    call ent_player_update_logic
     
 .loop:
     call get_next
@@ -217,7 +217,7 @@ EntityManager_update_logic::
     cp ENT_TYPE_CHEST
     jr nz, .checkBomb
     ; TODO implementar lógica cofre
-    jr. loop
+    jr .loop
 
 .checkBomb:
     cp ENT_TYPE_BOMB
