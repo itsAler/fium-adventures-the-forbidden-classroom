@@ -38,7 +38,15 @@ InitGameplayState::
 
 UpdateGameplayState::
 	call ResetShadowOAM
-	call EntityManager_update_logic
+    call UpdateInputKeys
+	call Player_update_logic
+
+	ld b, [ENT_PLAYER_Y]
+	ld c, [ENT_PLAYER_Y+1]
+	ld d, [ENT_PLAYER_X]
+	ld e, [ENT_PLAYER_X+1]
+	ld hl, 
+	call RenderMetasprite
 
 	call WaitForOneVBlankFunction
 	call hOAMDMA

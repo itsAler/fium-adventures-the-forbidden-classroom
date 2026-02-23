@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.2.19)  22 FEB 2026 17:26
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.2.19)  23 FEB 2026 12:06
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -949,15 +949,15 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has b
                    \relax 
 l.11 \newpage
               [1]
-LaTeX Info: Redefining \. on input line 44.
-LaTeX Info: Redefining \% on input line 44.
-LaTeX Info: Redefining \. on input line 44.
-LaTeX Info: Redefining \% on input line 44.
+LaTeX Info: Redefining \. on input line 46.
+LaTeX Info: Redefining \% on input line 46.
+LaTeX Info: Redefining \. on input line 46.
+LaTeX Info: Redefining \% on input line 46.
  [2]
-Overfull \vbox (8.67252pt too high) has occurred while \output is active []
+Overfull \vbox (42.55586pt too high) has occurred while \output is active []
 
-LaTeX Info: Redefining \. on input line 44.
-LaTeX Info: Redefining \% on input line 44.
+LaTeX Info: Redefining \. on input line 46.
+LaTeX Info: Redefining \% on input line 46.
  [3] (./main.aux
 LaTeX Info: Redefining \. on input line 11.
 LaTeX Info: Redefining \% on input line 11.
@@ -974,21 +974,21 @@ Package rerunfilecheck Warning: File `main.out' has changed.
 
 Package rerunfilecheck Info: Checksums for `main.out':
 (rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  36D29ECD765B4C8A421D6699A3ECFD86;5034.
+(rerunfilecheck)             After:  5864031652D2459CBE1FF32FD6FC6A7E;5278.
  ) 
 Here is how much of TeX's memory you used:
- 43433 strings out of 474222
- 1013613 string characters out of 5748733
+ 43434 strings out of 474222
+ 1013622 string characters out of 5748733
  1932975 words of memory out of 5000000
  65017 multiletter control sequences out of 15000+600000
  561449 words of font info for 47 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  108i,12n,113p,792b,609s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsl12.pfb>
-Output written on main.pdf (4 pages, 158004 bytes).
+Output written on main.pdf (4 pages, 158311 bytes).
 PDF statistics:
- 113 PDF objects out of 1000 (max. 8388607)
- 74 compressed objects within 1 object stream
- 30 named destinations out of 1000 (max. 500000)
+ 115 PDF objects out of 1000 (max. 8388607)
+ 76 compressed objects within 1 object stream
+ 31 named destinations out of 1000 (max. 500000)
  162 words of extra memory for PDF output out of 10000 (max. 10000000)
 

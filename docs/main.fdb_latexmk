@@ -1,7 +1,7 @@
 # Fdb version 4
-["pdflatex"] 1771777615.77804 "/home/alex/proyectos/fium-adventures-the-forbidden-classroom/docs/main.tex" "main.pdf" "main" 1771777617.63619 2
+["pdflatex"] 1771844779.00757 "/home/alex/proyectos/fium-adventures-the-forbidden-classroom/docs/main.tex" "main.pdf" "main" 1771844781.01026 2
   "/etc/texmf/web2c/texmf.cnf" 1771503416.08015 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/alex/proyectos/fium-adventures-the-forbidden-classroom/docs/main.tex" 1771777613.22463 1375 aed2f0363383190c6eace0141e43994f ""
+  "/home/alex/proyectos/fium-adventures-the-forbidden-classroom/docs/main.tex" 1771844775.88736 1424 35c8a17987c659bcf937ac771e23503b ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm" 1136768653 1324 c910af8c371558dc20f2d7822f66fe64 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmr12.tfm" 1136768653 1288 655e228510b4c2a1abe905c368440826 ""
@@ -235,10 +235,10 @@
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1771503522 8212731 73c502482de2065f134d9366ce0dde81 ""
   "estilosumu.sty" 1771499777.07811 3102 3144e242d42d9663dc87ae985cdd9d55 ""
   "imagenes/hcmut.png" 1771499777.08211 135948 e62d5dcaa2ad935c3f7eb8f4f2ef5907 ""
-  "main.aux" 1771777617.50856 3704 5af40ec4b9aec3f0a8e13fe0c1a8c358 "pdflatex"
-  "main.out" 1771777617.50856 5034 36d29ecd765b4c8a421d6699a3ecfd86 "pdflatex"
-  "main.tex" 1771777613.22463 1375 aed2f0363383190c6eace0141e43994f ""
-  "main.toc" 1771777617.51259 2385 2a24e90145d5ab5d979ce41a119d250c "pdflatex"
+  "main.aux" 1771844780.88658 3838 b5eeccd1d0abe316c3d631a7d2fdd492 "pdflatex"
+  "main.out" 1771844780.89462 5278 5864031652d2459cbe1ff32fd6fc6a7e "pdflatex"
+  "main.tex" 1771844775.88736 1424 35c8a17987c659bcf937ac771e23503b ""
+  "main.toc" 1771844780.89864 2478 75650034b93aaa115764a013e1a99c33 "pdflatex"
   "portada.tex" 1771499777.09412 787 2371b583df289ab1980fc570942aacf1 ""
   (generated)
   "main.aux"

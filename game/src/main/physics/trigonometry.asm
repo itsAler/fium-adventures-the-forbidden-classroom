@@ -10,11 +10,39 @@
 ;    value = round(math.sin(2* math.pi * i / 256) * 256)
 ;    print(f"DW {value}")
 
+DEF ANGLE_0DEG      EQU 0
+DEF ANGLE_45DEG     EQU 32
+DEF ANGLE_90DEG     EQU 64
+DEF ANGLE_135DEG    EQU 96
+DEF ANGLE_180DEG    EQU 128
+DEF ANGLE_225DEG    EQU 160
+DEF ANGLE_270DEG    EQU 192
+DEF ANGLE_315DEG    EQU 224
+
 SECTION "Sin Lookup Table", ROM0
 
-; seno[ángulo] = DW [-255, 255]
+; Obtiene el seno de un ángulo
+;
+; IN:
+; A = ángulo
+; OUT:
+; Entero con signo en DE [-255, 255].
+;
+; Destruye hl, de
+sinOfAinDE::
+    ld l, a
+    ld h, 0
+    add hl, hl ; como multiplicar x2, ya que trabajmos con 2 Bytes
+    ld de, sin_lookup_table
+    add hl, de ; añadimos offset -> hl con dir a sin(ángulo)
+    ld e, (hl)
+    inc hl
+    ld d, (hl)
+    ret
+
 ; Se indexa por seno_lookup[angulo] -> addr = seno_lookup + ángulo
-; Donde 1B ángulo [0, 255] -> ángulo [0º, 360º] 
+; Cambio de escala: ángulo [0º, 360º] -> 1B [0, 255]
+; Equivalencia: angle_byte = grados * 256 / 360
 sin_lookup_table::
 DW 0
 DW 6
