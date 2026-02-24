@@ -14,6 +14,15 @@ InitGameplayState::
 	call InitSprObjLib
 	call Player_init
 
+	; Reset hardware OAM
+	xor a
+	ld b, 160
+	ld hl, _OAMRAM
+	.resetOAM
+	ld [hli], a
+	dec b
+	jr nz, .resetOAM
+
 	; Reset window and scroll.
 	xor a
 	ld [rWY], a

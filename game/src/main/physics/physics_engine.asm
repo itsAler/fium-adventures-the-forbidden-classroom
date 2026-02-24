@@ -1,6 +1,10 @@
 ; Motor de físicas encargado del movimiento de las entidades
 ; y la colisión entre estos y el entorno.
 
+SECTION "Physics Engine Variables", WRAM0
+PE_VEL: DB
+PE_ANGLE: DB
+
 SECTION "Physics Engine Functions", ROM0
 ; Dado el ángulo y velocidad de un objeto, devuelve las componentes X e Y de dicha velocidad.
 ;
@@ -8,7 +12,11 @@ SECTION "Physics Engine Functions", ROM0
 ; 
 ; OUT: BC = Q12.4 vel_y, DE = Q12.4 vel_x
 PhysicsEngine_computeVelocity::
-    push bc ; Almacenamos ángulo y velocidad para vel_x
+    ; Almacenamos ángulo y velocidad
+    ld a, b
+    ld [PE_ANGLE], a
+    ld a, c
+    ld [PE_VEL], a
 
     ; vel_y = sin(angle) * velocity
     ld a, b
@@ -20,14 +28,12 @@ PhysicsEngine_computeVelocity::
     ld b, h ; BC = vel_y
     ld c, l
 
-    pop hl ; H = angle, L = velocity
-
     ; vel_x = cos(angle) * velocity
-    ld a, h
+    ld a, [PE_ANGLE]
     add a, 64 ; offset para coseno empleando tabla seno
     call sinOfAinDE
 
-    ld a, l
+    ld a, [PE_VEL]
     call Mul16x8 ; HL = vel_x
 
     ld d, h ; DE = vel_x

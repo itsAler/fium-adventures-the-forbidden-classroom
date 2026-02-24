@@ -1,12 +1,6 @@
 INCLUDE "src/main/utils/hardware.inc"
 INCLUDE "src/main/utils/constants.inc"
 
-; Player Constants
-DEF ENT_PLAYER_INIT_VEL_MAX EQU 60
-DEF ENT_PLAYER_INIT_HEALTH  EQU 20
-DEF ENT_PLAYER_INIT_DAMAGE  EQU 5
-DEF ENT_PLAYER_INIT_VEL_INC EQU 16
-
 SECTION "Player Variables", WRAM0
 PLAYER_VEL::        DB
 PLAYER_VEL_MAX::    DB
@@ -29,12 +23,7 @@ PlayerMetasprite::
 
 
 SECTION "Player Entity", ROM0
-; Inicializa un jugador.
-;
-; init_data(entityList* et_free_space) returns none
-; Destruye a, de, bc, hl
-;
-;
+; Inicializa el jugador.
 Player_init::
     ; Copiar tiles del player
 	ld de, playerTiles
@@ -46,16 +35,17 @@ Player_init::
     xor a
     ld [PLAYER_VEL], a
 
-    ld [PLAYER_ANGLE], a
+    ld [PLAYER_POS_X], a
+    ld [PLAYER_POS_X + 1], a
 
-    ld [PLAYER_X], a
-    ld [PLAYER_X + 1], a
+    ld [PLAYER_POS_Y], a
+    ld [PLAYER_POS_Y + 1], a
 
-    ld [PLAYER_Y], a
-    ld [PLAYER_Y + 1], a
-
-    ld a, [PLAYER_INIT_VEL_MAX]
+    ld a, PLAYER_INIT_VEL_MAX
     ld [PLAYER_VEL_MAX], a
+
+    ld a, ANGLE_NULL
+    ld [PLAYER_ANGLE], a
 
     ret
 
@@ -66,8 +56,7 @@ Player_init::
 ; renderizado del jugador principal.
 Player_update_logic::
     ; Obtener ángulo de movimiento
-    ld a, [PLAYER_ANGLE]
-    ld b, a
+    ld b, ANGLE_NULL
 
 CheckLeft:
     ld a, [wCurKeys]
@@ -128,9 +117,26 @@ RightUp:
 CheckEnd:
     ld a, b
     ld [PLAYER_ANGLE], a
+
+    cp a, ANGLE_NULL
+    jp nz, inputPresent
     
-    ld a, [PLAYER_VEL]
+    ld a, [PLAYER_POS_Y]
     ld b, a
+    ld a, [PLAYER_POS_Y + 1]
+    ld c, a
+
+    ld a, [PLAYER_POS_X]
+    ld d, a
+    ld a, [PLAYER_POS_X + 1]
+    ld e, a
+
+    jp render
+
+inputPresent:
+    ; El ángulo ya esta en B
+    ld a, [PLAYER_VEL]
+    ld c, a
     ; Calcular velocidad
     ; vel_y = sin(ángulo) * velocity
     ; vel_x = cos(ángulo) * velocity
@@ -173,7 +179,8 @@ CheckEnd:
 
     ; TODO:
     call PhysicsEngine_check_collision
-    
+
+render:
     ; Renderizamos el metasprite
 	ld hl, PlayerMetasprite
 	call RenderMetasprite
