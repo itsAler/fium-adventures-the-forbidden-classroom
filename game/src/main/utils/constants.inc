@@ -1,5 +1,15 @@
 include "src/main/utils/hardware.inc"
 
+; Trigonometry
+DEF ANGLE_0DEG      EQU 0
+DEF ANGLE_45DEG     EQU 32
+DEF ANGLE_90DEG     EQU 64
+DEF ANGLE_135DEG    EQU 96
+DEF ANGLE_180DEG    EQU 128
+DEF ANGLE_225DEG    EQU 160
+DEF ANGLE_270DEG    EQU 192
+DEF ANGLE_315DEG    EQU 224
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DEF MAX_ENEMY_COUNT EQU 10

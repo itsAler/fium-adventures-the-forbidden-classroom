@@ -14,9 +14,7 @@ InitGameplayState::
 	call InitializeBackground
 	call EntityManager_init
 	call InitSprObjLib
-	
-	ld hl, ent_player_init_data
-	call EntityManager_add_entity
+	call Player_init
 
 	; Reset window and scroll.
 	xor a
@@ -36,17 +34,12 @@ InitGameplayState::
     ret
 
 
+
 UpdateGameplayState::
+
 	call ResetShadowOAM
     call UpdateInputKeys
 	call Player_update_logic
-
-	ld b, [ENT_PLAYER_Y]
-	ld c, [ENT_PLAYER_Y+1]
-	ld d, [ENT_PLAYER_X]
-	ld e, [ENT_PLAYER_X+1]
-	ld hl, 
-	call RenderMetasprite
 
 	call WaitForOneVBlankFunction
 	call hOAMDMA

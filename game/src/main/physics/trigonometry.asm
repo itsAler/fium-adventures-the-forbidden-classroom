@@ -1,25 +1,4 @@
-; Tabla de consulta precomputada para el seno.
-; Ocupa 2B por entrada * 256 posibles ángulos = 512B ROM
-
-; TODO: Posibles optimizaciones (interpolación lineal o cosas por el estilo)
-
-; Calculado con https://www.online-python.com/
-;import math
-;
-;for i in range(256):
-;    value = round(math.sin(2* math.pi * i / 256) * 256)
-;    print(f"DW {value}")
-
-DEF ANGLE_0DEG      EQU 0
-DEF ANGLE_45DEG     EQU 32
-DEF ANGLE_90DEG     EQU 64
-DEF ANGLE_135DEG    EQU 96
-DEF ANGLE_180DEG    EQU 128
-DEF ANGLE_225DEG    EQU 160
-DEF ANGLE_270DEG    EQU 192
-DEF ANGLE_315DEG    EQU 224
-
-SECTION "Sin Lookup Table", ROM0
+SECTION "Trigonometry Functions", ROM0
 
 ; Obtiene el seno de un ángulo
 ;
@@ -32,17 +11,31 @@ SECTION "Sin Lookup Table", ROM0
 sinOfAinDE::
     ld l, a
     ld h, 0
-    add hl, hl ; como multiplicar x2, ya que trabajmos con 2 Bytes
+    add hl, hl ; como multiplicar x2, ya que trabajmos con 2 Bytes por ángulo
     ld de, sin_lookup_table
     add hl, de ; añadimos offset -> hl con dir a sin(ángulo)
-    ld e, (hl)
+    ld e, [hl]
     inc hl
-    ld d, (hl)
+    ld d, [hl]
     ret
 
+SECTION "Sin Lookup Table", ROM0
+
+; Tabla de consulta precomputada para el seno.
+; Ocupa 2B por entrada * 256 posibles ángulos = 512B ROM -> Optimizable
+
+
 ; Se indexa por seno_lookup[angulo] -> addr = seno_lookup + ángulo
-; Cambio de escala: ángulo [0º, 360º] -> 1B [0, 255]
+; Cambio de escala: ángulo [0º, 360º] -> 1B angle_byte [0, 255]
 ; Equivalencia: angle_byte = grados * 256 / 360
+
+; Calculado con https://www.online-python.com/
+;import math
+;
+;for i in range(256):
+;    value = round(math.sin(2* math.pi * i / 256) * 256)
+;    print(f"DW {value}")
+
 sin_lookup_table::
 DW 0
 DW 6

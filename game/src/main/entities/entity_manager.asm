@@ -182,9 +182,7 @@ EntityManager_update_logic::
     ld hl, EntityListStart
     ld b, ENT_LIST_MAX
 
-    ; Actualizar la lógica del jugador, asumimos que siempre 
-    ; es la primera entidad en la lista.
-    call ent_player_update_logic
+    ; TODO Arreglar lista sin jugador
     
 .loop:
     call get_next
@@ -221,35 +219,11 @@ EntityManager_update_logic::
 
 .checkBomb:
     cp ENT_TYPE_BOMB
-    jr nz, .isPlayer
     ; TODO: Implementar lógica enemigo
     jr .loop
 
-.isPlayer:
-    call ent_player_update_logic
-    jr .loop
 
-
-
-; Vuelca a los registros reales de OAM y LCD los valores actualizados.
-;
-; dump_logic() returns none;
-;
-; Solo debe ser llamada durante VBlank.
-EntityManager_dump_logic::
-    ; Actualización del BGScroll durante vblank
-	ld a, [wBackgroundScroll_Y_real]
-	ld [rSCY], a
-	ld a, [wBackgroundScroll_X_real]
-	ld [rSCX], a
-
-    ; Actualización de la OAM
-    ld a, HIGH(wShadowOAM)
-	call hOAMDMA
-
-	ret
-
-
+    
 ; Obtiene el comienzo del siguiente elemento de la lista
 ;
 ; get_next(hl = entity_table* previous) returns hl;
