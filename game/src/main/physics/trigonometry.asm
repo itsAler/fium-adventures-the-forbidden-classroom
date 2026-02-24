@@ -5,9 +5,9 @@ SECTION "Trigonometry Functions", ROM0
 ; IN:
 ; A = ángulo
 ; OUT:
-; Entero con signo en DE [-255, 255].
+; DE = Q16.0 (Little Endian, complemento a 2) [-255, 255].
 ;
-; Destruye hl, de
+; Destruye: hl, de
 sinOfAinDE::
     ld l, a
     ld h, 0

@@ -1,4 +1,5 @@
 INCLUDE "src/main/utils/hardware.inc"
+INCLUDE "src/main/utils/constants.inc"
 
 SECTION "GameplayVariables", WRAM0
 
@@ -18,7 +19,7 @@ InitGameplayState::
 	xor a
 	ld b, 160
 	ld hl, _OAMRAM
-	.resetOAM
+.resetOAM
 	ld [hli], a
 	dec b
 	jr nz, .resetOAM
@@ -44,7 +45,7 @@ InitGameplayState::
 
 UpdateGameplayState::
 	call ResetShadowOAM
-    call UpdateInputKeys
+    call UpdateInputKeys 
 	call Player_update_logic
 
 	call WaitForOneVBlankFunction

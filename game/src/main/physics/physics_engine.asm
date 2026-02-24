@@ -21,23 +21,18 @@ PhysicsEngine_computeVelocity::
     ; vel_y = sin(angle) * velocity
     ld a, b
     call sinOfAinDE
-
-    ld a, c
-    call Mul16x8 ; HL = vel_y
-
-    ld b, h ; BC = vel_y
-    ld c, l
+; $0B57
+    ld b, e ; BC = vel_y 
+    ld c, d
 
     ; vel_x = cos(angle) * velocity
     ld a, [PE_ANGLE]
     add a, 64 ; offset para coseno empleando tabla seno
     call sinOfAinDE
 
-    ld a, [PE_VEL]
-    call Mul16x8 ; HL = vel_x
-
-    ld d, h ; DE = vel_x
-    ld e, l
+    ld h, d
+    ld d, e ; DE = vel_x
+    ld e, h
 
     ret 
 

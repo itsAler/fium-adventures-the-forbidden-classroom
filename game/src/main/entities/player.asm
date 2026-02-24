@@ -5,8 +5,8 @@ SECTION "Player Variables", WRAM0
 PLAYER_VEL::        DB
 PLAYER_VEL_MAX::    DB
 PLAYER_ANGLE::      DB
-PLAYER_POS_X::      DW   ;Q12.4
-PLAYER_POS_Y::      DW   ;Q12.4
+PLAYER_POS_X::      DW   ;Q12.4 (litte endian)
+PLAYER_POS_Y::      DW   ;Q12.4 (litte endian)
 PLAYER_HEALTH::     DB
 PLAYER_DAMAGE::     DB
 PLAYER_SHOT_FREC::  DB
@@ -33,7 +33,6 @@ Player_init::
 
     ; Inicializamos los atributos del jugador
     xor a
-    ld [PLAYER_VEL], a
 
     ld [PLAYER_POS_X], a
     ld [PLAYER_POS_X + 1], a
@@ -47,6 +46,9 @@ Player_init::
     ld a, ANGLE_NULL
     ld [PLAYER_ANGLE], a
 
+    ld a, PLAYER_INIT_VEL
+    ld [PLAYER_VEL], a
+
     ret
 
 
@@ -56,132 +58,154 @@ Player_init::
 ; renderizado del jugador principal.
 Player_update_logic::
     ; Obtener ángulo de movimiento
+    ld a, [wCurKeys]
+
+    ;DEBUG, FORZAMOS MOVIMIENTO DER
+    ld a, PADF_LEFT
+
+    ; ---- RIGHT + UP ----
+    ld d, a
+    and PADF_RIGHT | PADF_UP
+    cp PADF_RIGHT | PADF_UP
+    jr z, .angle45
+
+    ; ---- RIGHT + DOWN ----
+    ld a, d
+    and PADF_RIGHT | PADF_DOWN
+    cp PADF_RIGHT | PADF_DOWN
+    jr z, .angle315
+
+    ; ---- LEFT + UP ----
+    ld a, d
+    and PADF_LEFT | PADF_UP
+    cp PADF_LEFT | PADF_UP
+    jr z, .angle135
+
+    ; ---- LEFT + DOWN ----
+    ld a, d
+    and PADF_LEFT | PADF_DOWN
+    cp PADF_LEFT | PADF_DOWN
+    jr z, .angle225
+
+    ; ---- Cardinales ----
+    ld a, d
+    and PADF_RIGHT
+    jr nz, .angle0
+
+    ld a, d
+    and PADF_LEFT
+    jr nz, .angle180
+
+    ld a, d
+    and PADF_UP
+    jr nz, .angle90
+
+    ld a, d
+    and PADF_DOWN
+    jr nz, .angle270
+
+    ; ---- Sin input ----
     ld b, ANGLE_NULL
+    jr .angleDone
 
-CheckLeft:
-    ld a, [wCurKeys]
-    and a, PADF_LEFT
-    jr z, CheckRight
-Left:
-    ld b, ANGLE_180DEG
-
-CheckRight:
-    ld a, [wCurKeys]
-    and a, PADF_RIGHT
-    jr z, CheckUp
-Right:
+.angle0:
     ld b, ANGLE_0DEG
+    jr .angleDone
 
-CheckUp:
-    ld a, [wCurKeys]
-    and a, PADF_UP
-    jr z, CheckDown
-Up:
+.angle45:
+    ld b, ANGLE_45DEG
+    jr .angleDone
+
+.angle90:
     ld b, ANGLE_90DEG
+    jr .angleDone
 
-CheckDown:
-    ld a, [wCurKeys]
-    and a, PADF_DOWN
-    jr z, CheckLeftDown
-Down:
-    ld b, ANGLE_270DEG
-
-CheckLeftDown:
-    ld a, [wCurKeys]
-    and a, PADF_DOWN | PADF_LEFT
-    jr z, CheckLeftUp
-LeftDown:
-    ld b, ANGLE_225DEG
-
-CheckLeftUp:
-    ld a, [wCurKeys]
-    and a, PADF_UP | PADF_LEFT
-    jr z, CheckRightDown
-LeftUp:
+.angle135:
     ld b, ANGLE_135DEG
+    jr .angleDone
 
-CheckRightDown:
-    ld a, [wCurKeys]
-    and a, PADF_RIGHT | PADF_DOWN
-    jr z, CheckRightUp
-RightDown:
+.angle180:
+    ld b, ANGLE_180DEG
+    jr .angleDone
+
+.angle225:
+    ld b, ANGLE_225DEG
+    jr .angleDone
+
+.angle270:
+    ld b, ANGLE_270DEG
+    jr .angleDone
+
+.angle315:
     ld b, ANGLE_315DEG
 
-CheckRightUp:
-    ld a, [wCurKeys]
-    and a, PADF_RIGHT | PADF_UP
-    jr z, CheckEnd
-RightUp:
-    ld b, ANGLE_45DEG
-
-CheckEnd:
+.angleDone:
     ld a, b
     ld [PLAYER_ANGLE], a
 
-    cp a, ANGLE_NULL
-    jp nz, inputPresent
-    
-    ld a, [PLAYER_POS_Y]
-    ld b, a
-    ld a, [PLAYER_POS_Y + 1]
-    ld c, a
+    ; Comprobar si hay input
+    cp ANGLE_NULL
+    jr z, .noInputPhysics
 
-    ld a, [PLAYER_POS_X]
-    ld d, a
-    ld a, [PLAYER_POS_X + 1]
-    ld e, a
-
-    jp render
-
-inputPresent:
-    ; El ángulo ya esta en B
+    ; Computar velocidad
     ld a, [PLAYER_VEL]
     ld c, a
-    ; Calcular velocidad
-    ; vel_y = sin(ángulo) * velocity
-    ; vel_x = cos(ángulo) * velocity
     call PhysicsEngine_computeVelocity
+    jr .applyMovement
 
-    ; Calcular nueva posición
+.noInputPhysics:
+    ; Sin input, vel=0
+    xor a
+    ld b, a
+    ld c, a
+    ld d, a
+    ld e, a
+
+.applyMovement:
+    ; $0A09
+    ; Calcular nueva posición:
     ; pos_y = pos_y + vel_y
-    ld a, [PLAYER_POS_Y]
-    ld h, a
     ld a, [PLAYER_POS_Y + 1]
+    ld h, a
+    ld a, [PLAYER_POS_Y]
     ld l, a
 
     add hl, bc
 
-    ; actualizamos bc con nueva pos
-    ld b, h
-    ld c, l
-
+    ; guardamos pos_y
     ld a, h
-    ld [PLAYER_POS_Y], a
-    ld a, l
     ld [PLAYER_POS_Y + 1], a
+    ld a, l
+    ld [PLAYER_POS_Y], a
     
     ; pos_x = pos_x + vel_x
-    ld a, [PLAYER_POS_X]
-    ld h, a
     ld a, [PLAYER_POS_X + 1]
+    ld h, a
+    ld a, [PLAYER_POS_X]
     ld l, a
-
+    
     add hl, de
 
-    ; actualizamos de con nueva pos
-    ld d, h 
-    ld e, l
-
     ld a, h
-    ld [PLAYER_POS_X], a
-    ld a, l
     ld [PLAYER_POS_X + 1], a
+    ld a, l
+    ld [PLAYER_POS_X], a
+    
 
     ; TODO:
     call PhysicsEngine_check_collision
 
-render:
     ; Renderizamos el metasprite
+    ld a, [PLAYER_POS_Y + 1]
+    ld b, a
+    ld a, [PLAYER_POS_Y]
+    ld c, a
+
+    ld a, [PLAYER_POS_X + 1]
+    ld d, a
+    ld a, [PLAYER_POS_X]
+    ld e, a
+    
 	ld hl, PlayerMetasprite
 	call RenderMetasprite
     
