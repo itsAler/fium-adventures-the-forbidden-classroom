@@ -5,7 +5,7 @@ SECTION "Trigonometry Functions", ROM0
 ; IN:
 ; A = ángulo
 ; OUT:
-; DE = Q16.0 (Little Endian, complemento a 2) [-255, 255].
+; DE = Q16.0 (En complemento a 2) [-256, 256].
 ;
 ; Destruye: hl, de
 sinOfAinDE::
@@ -14,7 +14,7 @@ sinOfAinDE::
     add hl, hl ; como multiplicar x2, ya que trabajmos con 2 Bytes por ángulo
     ld de, sin_lookup_table
     add hl, de ; añadimos offset -> hl con dir a sin(ángulo)
-    ld e, [hl]
+    ld e, [hl] ; Cuidado, están los DW en little endian, cargar primero e
     inc hl
     ld d, [hl]
     ret

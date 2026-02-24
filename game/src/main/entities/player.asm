@@ -61,7 +61,7 @@ Player_update_logic::
     ld a, [wCurKeys]
 
     ;DEBUG, FORZAMOS MOVIMIENTO DER
-    ld a, PADF_LEFT
+    ;ld a, PADF_RIGHT
 
     ; ---- RIGHT + UP ----
     ld d, a

@@ -22,17 +22,32 @@ PhysicsEngine_computeVelocity::
     ld a, b
     call sinOfAinDE
 ; $0B57
-    ld b, e ; BC = vel_y 
-    ld c, d
+    ld b, d ; BC = vel_y 
+    ld c, e
 
     ; vel_x = cos(angle) * velocity
     ld a, [PE_ANGLE]
     add a, 64 ; offset para coseno empleando tabla seno
     call sinOfAinDE
 
-    ld h, d
-    ld d, e ; DE = vel_x
-    ld e, h
+    ; Escalar velocidades para movimiento suave
+    srl b
+    rr c
+    srl b
+    rr c
+    srl b
+    rr c
+    srl b
+    rr c
+
+    srl d
+    rr e
+    srl d
+    rr e
+    srl d
+    rr e
+    srl d
+    rr e
 
     ret 
 
