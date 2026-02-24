@@ -44,3 +44,29 @@ deEscaleBCtoA::
   ld a, b
 
 	ret
+
+; Entrada:
+; DE = multiplicando (signed 16)
+; A  = multiplicador (8 bit)
+; Salida:
+; HL = resultado
+;
+; Destruye: A, HL, DE, B
+Mul16x8::
+    LD HL, 0
+    LD B, 8
+
+.loop:
+    SRL A              ; shift right multiplicador
+    JR NC, .skip
+
+    ADD HL, DE         ; suma si bit activo
+
+.skip:
+    SLA E              ; shift DE << 1
+    RL D
+
+    DEC B
+    JR NZ, .loop
+
+    RET

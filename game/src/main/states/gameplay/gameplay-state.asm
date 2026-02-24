@@ -8,9 +8,7 @@ wBackgroundScroll_X_real:: db
 wBackgroundScroll_Y_real:: db
 
 SECTION "GameplayState", ROM0
-
 InitGameplayState::
-
 	call InitializeBackground
 	call EntityManager_init
 	call InitSprObjLib
@@ -36,12 +34,12 @@ InitGameplayState::
 
 
 UpdateGameplayState::
-
 	call ResetShadowOAM
     call UpdateInputKeys
 	call Player_update_logic
 
 	call WaitForOneVBlankFunction
+	ld a, HIGH(wShadowOAM)
 	call hOAMDMA
 
 	jp UpdateGameplayState

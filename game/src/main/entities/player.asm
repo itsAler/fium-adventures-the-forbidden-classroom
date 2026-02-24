@@ -5,20 +5,18 @@ INCLUDE "src/main/utils/constants.inc"
 DEF ENT_PLAYER_INIT_VEL_MAX EQU 60
 DEF ENT_PLAYER_INIT_HEALTH  EQU 20
 DEF ENT_PLAYER_INIT_DAMAGE  EQU 5
-DEF ENT_PLAYER_INIT_VEL_INC      EQU 16
-
+DEF ENT_PLAYER_INIT_VEL_INC EQU 16
 
 SECTION "Player Variables", WRAM0
-ENT_PLAYER_VEL:: DB
-ENT_PLAYER_VEL_MAX:: DB
-ENT_PLAYER_VEL_INC:: DB
-ENT_PLAYER_ANGLE:: DB
-ENT_PLAYER_X:: DW   ;Q12.4
-ENT_PLAYER_Y:: DW   ;Q12.4
-ENT_PLAYER_HEALTH:: DB
-ENT_PLAYER_DAMAGE:: DB
-ENT_PLAYER_SHOOTING_FRECUENCY:: DB
-ENT_PLAYER_BULLET_VELOCITY:: DB
+PLAYER_VEL::        DB
+PLAYER_VEL_MAX::    DB
+PLAYER_ANGLE::      DB
+PLAYER_POS_X::      DW   ;Q12.4
+PLAYER_POS_Y::      DW   ;Q12.4
+PLAYER_HEALTH::     DB
+PLAYER_DAMAGE::     DB
+PLAYER_SHOT_FREC::  DB
+PLAYER_SHOT_VEL::   DB
 
 SECTION "Graphics", ROM0
 playerTiles: INCBIN "src/generated/sprites/player.2bpp"
@@ -31,7 +29,6 @@ PlayerMetasprite::
 
 
 SECTION "Player Entity", ROM0
-
 ; Inicializa un jugador.
 ;
 ; init_data(entityList* et_free_space) returns none
@@ -47,29 +44,31 @@ Player_init::
 
     ; Inicializamos los atributos del jugador
     xor a
-    ld [ENT_PLAYER_VEL], a
+    ld [PLAYER_VEL], a
 
-    ld [ENT_PLAYER_ANGLE], a
+    ld [PLAYER_ANGLE], a
 
-    ld [ENT_PLAYER_X], a
-    ld [ENT_PLAYER_X + 1], a
+    ld [PLAYER_X], a
+    ld [PLAYER_X + 1], a
 
-    ld [ENT_PLAYER_Y], a
-    ld [ENT_PLAYER_Y + 1], a
+    ld [PLAYER_Y], a
+    ld [PLAYER_Y + 1], a
 
-    ld a, [ENT_PLAYER_INIT_VEL_MAX]
-    ld [ENT_PLAYER_VEL_MAX], a
-
-    ld a, [ENT_PLAYER_INIT_VEL_INC]
-    ld [ENT_PLAYER_VEL_INC], a
+    ld a, [PLAYER_INIT_VEL_MAX]
+    ld [PLAYER_VEL_MAX], a
 
     ret
 
 
 
+; Encargado de actualizar y llamar a las rutinas para
+; el movimiento, las colisiones, los disparos y el
+; renderizado del jugador principal.
 Player_update_logic::
+    ; Obtener ángulo de movimiento
+    ld a, [PLAYER_ANGLE]
+    ld b, a
 
-    ; Obtener ángulo
 CheckLeft:
     ld a, [wCurKeys]
     and a, PADF_LEFT
@@ -97,7 +96,7 @@ CheckDown:
     jr z, CheckLeftDown
 Down:
     ld b, ANGLE_270DEG
-    
+
 CheckLeftDown:
     ld a, [wCurKeys]
     and a, PADF_DOWN | PADF_LEFT
@@ -127,28 +126,55 @@ RightUp:
     ld b, ANGLE_45DEG
 
 CheckEnd:
-    ; Calculamos velocidad en cada eje en base al ángulo de movimiento.
-    ; TODO
     ld a, b
-    call sinOfAinDE
-      
-    ld h, d
-    ld l, e ; HL = SIN(A)
+    ld [PLAYER_ANGLE], a
+    
+    ld a, [PLAYER_VEL]
+    ld b, a
+    ; Calcular velocidad
+    ; vel_y = sin(ángulo) * velocity
+    ; vel_x = cos(ángulo) * velocity
+    call PhysicsEngine_computeVelocity
 
-    ld a, [ENT_PLAYER_VEL]
+    ; Calcular nueva posición
+    ; pos_y = pos_y + vel_y
+    ld a, [PLAYER_POS_Y]
+    ld h, a
+    ld a, [PLAYER_POS_Y + 1]
+    ld l, a
 
-    add a, 64 ; offset coseno
-    call sinOfAinDE ; DE = COS(A)
+    add hl, bc
 
-    ; Aañdimos a shadowOAM el metasprite
-    ld a, [ENT_PLAYER_Y]
-	ld b, a
-    ld a, [ENT_PLAYER_Y + 1]
-	ld c, a
-    ld a, [ENT_PLAYER_X]
-	ld d, a
-	ld a, [ENT_PLAYER_X+1]
-    ld e, a
+    ; actualizamos bc con nueva pos
+    ld b, h
+    ld c, l
+
+    ld a, h
+    ld [PLAYER_POS_Y], a
+    ld a, l
+    ld [PLAYER_POS_Y + 1], a
+    
+    ; pos_x = pos_x + vel_x
+    ld a, [PLAYER_POS_X]
+    ld h, a
+    ld a, [PLAYER_POS_X + 1]
+    ld l, a
+
+    add hl, de
+
+    ; actualizamos de con nueva pos
+    ld d, h 
+    ld e, l
+
+    ld a, h
+    ld [PLAYER_POS_X], a
+    ld a, l
+    ld [PLAYER_POS_X + 1], a
+
+    ; TODO:
+    call PhysicsEngine_check_collision
+    
+    ; Renderizamos el metasprite
 	ld hl, PlayerMetasprite
 	call RenderMetasprite
     
