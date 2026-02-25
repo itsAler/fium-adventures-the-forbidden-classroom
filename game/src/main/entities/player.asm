@@ -151,6 +151,28 @@ Player_update_logic::
     ld a, [PLAYER_VEL]
     ld c, a
     call PhysicsEngine_computeVelocity
+
+    ; Escalar velocidades para movimiento suave, ya que 
+    ; la tabla de seno y coseno tiene valores muy grandes
+    ; para los Q12.4 que usa RenderMetasprite
+    srl b
+    rr c
+    srl b
+    rr c
+    srl b
+    rr c
+    srl b
+    rr c
+
+    srl d
+    rr e
+    srl d
+    rr e
+    srl d
+    rr e
+    srl d
+    rr e
+
     jr .applyMovement
 
 .noInputPhysics:
@@ -191,7 +213,6 @@ Player_update_logic::
     ld a, l
     ld [PLAYER_POS_X], a
     
-
     ; TODO:
     call PhysicsEngine_check_collision
 

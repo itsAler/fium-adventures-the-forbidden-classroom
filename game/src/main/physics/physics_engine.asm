@@ -8,6 +8,8 @@ PE_ANGLE: DB
 SECTION "Physics Engine Functions", ROM0
 ; Dado el ángulo y velocidad de un objeto, devuelve las componentes X e Y de dicha velocidad.
 ;
+; NOTA: vel_y está invertida para funcionar correctamente con la representación en pantalla.
+;
 ; IN: B = Angle, C = velocity
 ; 
 ; OUT: BC = Q12.4 vel_y, DE = Q12.4 vel_x
@@ -21,33 +23,19 @@ PhysicsEngine_computeVelocity::
     ; vel_y = sin(angle) * velocity
     ld a, b
     call sinOfAinDE
-; $0B57
-    ld b, d ; BC = vel_y 
-    ld c, e
+
+    ; Negar vel_y
+    xor a
+    sub e
+    ld c, a
+    ld a, 0
+    sbc a, d
+    ld b, a         ; BC = -vel_y
 
     ; vel_x = cos(angle) * velocity
     ld a, [PE_ANGLE]
     add a, 64 ; offset para coseno empleando tabla seno
-    call sinOfAinDE
-
-    ; Escalar velocidades para movimiento suave
-    srl b
-    rr c
-    srl b
-    rr c
-    srl b
-    rr c
-    srl b
-    rr c
-
-    srl d
-    rr e
-    srl d
-    rr e
-    srl d
-    rr e
-    srl d
-    rr e
+    call sinOfAinDE ; DE = vel_x
 
     ret 
 
