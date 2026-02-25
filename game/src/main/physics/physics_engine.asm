@@ -14,6 +14,8 @@ SECTION "Physics Engine Functions", ROM0
 ; 
 ; OUT: BC = Q12.4 vel_y, DE = Q12.4 vel_x
 PhysicsEngine_computeVelocity::
+    ; TODO: Multiplicar por la velocidad
+
     ; Almacenamos ángulo y velocidad
     ld a, b
     ld [PE_ANGLE], a
@@ -42,5 +44,6 @@ PhysicsEngine_computeVelocity::
 
 
 PhysicsEngine_check_collision::
+    ; TODO
     ret
 

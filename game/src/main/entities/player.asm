@@ -46,9 +46,6 @@ Player_init::
     ld a, ANGLE_NULL
     ld [PLAYER_ANGLE], a
 
-    ld a, PLAYER_INIT_VEL
-    ld [PLAYER_VEL], a
-
     ret
 
 

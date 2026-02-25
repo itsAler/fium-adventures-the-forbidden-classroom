@@ -8,12 +8,29 @@ wBackgroundScroll_Y:: dw
 wBackgroundScroll_X_real:: db
 wBackgroundScroll_Y_real:: db
 
+SECTION "Gameplay Tiles", ROM0
+gameplayTileset:
+	DB $3E,$10,$3E,$00,$60,$00,$78,$00
+	DB $3C,$00,$3E,$00,$10,$60,$16,$6E
+	DB $07,$3F,$20,$1E,$32,$02,$30,$00
+	DB $78,$00,$C8,$00,$8C,$00,$84,$00
+	DB $FF,$FF,$BD,$C3,$DB,$A5,$E7,$99
+	DB $E7,$99,$DB,$A5,$BD,$C3,$FF,$FF
+gameplayTilesetEnd:
+
 SECTION "GameplayState", ROM0
 InitGameplayState::
 	call InitializeBackground
 	call EntityManager_init
 	call InitSprObjLib
 	call Player_init
+	call Box_init
+
+	; Copiar tiles en VRAM
+	ld de, gameplayTileset
+	ld hl, _VRAM8000
+	ld bc, gameplayTilesetEnd - gameplayTileset ; bc contains how many bytes we have to copy.
+    call CopyDEintoMemoryAtHL
 
 	; Reset hardware OAM
 	xor a
@@ -47,6 +64,7 @@ UpdateGameplayState::
 	call ResetShadowOAM
     call UpdateInputKeys 
 	call Player_update_logic
+	call Box__update_logic
 
 	call WaitForOneVBlankFunction
 	ld a, HIGH(wShadowOAM)
