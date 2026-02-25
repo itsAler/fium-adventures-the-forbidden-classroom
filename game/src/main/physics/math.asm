@@ -54,20 +54,23 @@ sinOfAinDE::
 ; OUT:
 ; HL = Q16.0 (C2)
 ;
-; Destruye: HL, A, DE
+; Destruye: HL, A
 mulHLbyA::
-  ld d, 0
-  ld e, a
+  cp 0
+  jr nz, .mulLoop
 
-.multLoop:
-  cp z
+  ld h, 0
+  ld l, 0
+  ret
+
+.mulLoop:
+  cp 0
   jr z, .loopEnd
 
-  add hl, de
-  jr c, 
+  add hl, hl
   
   dec a
-  jr .multLoop
+  jr .mulLoop
 
 .loopEnd:
   ret
