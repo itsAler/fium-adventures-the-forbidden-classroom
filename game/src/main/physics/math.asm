@@ -1,10 +1,9 @@
 
 SECTION "MathVariables", WRAM0
 randstate:: ds 4
+MATH_MULTIPLIER_COUNT:: DB
 
 SECTION "Math", ROM0
-
-
 ;; From: https://github.com/pinobatch/libbet/blob/master/src/rand.z80#L34-L54
 ; Generates a pseudorandom 16-bit integer in BC
 ; using the LCG formula from cc65 rand():
@@ -25,4 +24,50 @@ rand::
   adc [hl]
   ld [hl], a
   ld b, a
+  ret
+
+; Obtiene el seno de un ángulo
+;
+; IN:
+; A = ángulo
+; OUT:
+; DE = Q16.0 (En complemento a 2) [-256, 256].
+;
+; Destruye: hl, de
+sinOfAinDE::
+    ld l, a
+    ld h, 0
+    add hl, hl ; como multiplicar x2, ya que trabajmos con 2 Bytes por ángulo
+    ld de, sin_lookup_table
+    add hl, de ; añadimos offset -> hl con dir a sin(ángulo)
+    ld e, [hl] ; Cuidado, están los DW en little endian, cargar primero e
+    inc hl
+    ld d, [hl]
+    ret
+
+; Multiplica HL por A
+;
+; IN:
+; HL = Q16.0 (C2)
+; A = Entero sin signo
+;
+; OUT:
+; HL = Q16.0 (C2)
+;
+; Destruye: HL, A, DE
+mulHLbyA::
+  ld d, 0
+  ld e, a
+
+.multLoop:
+  cp z
+  jr z, .loopEnd
+
+  add hl, de
+  jr c, 
+  
+  dec a
+  jr .multLoop
+
+.loopEnd:
   ret
