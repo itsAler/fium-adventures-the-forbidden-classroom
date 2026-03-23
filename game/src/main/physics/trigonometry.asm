@@ -1,3 +1,23 @@
+SECTION "Trigonometry Functions", ROM0
+
+; Obtiene el seno de un ángulo
+;
+; IN: A (uint Q8) = ángulo
+;
+; OUT: DE (signed Q16) = sen(angulo) [-256, 256].
+;
+; Destruye: hl, de
+sinOfAinDE::
+    ld l, a
+    ld h, 0
+    add hl, hl ; como multiplicar x2, ya que trabajmos con 2 Bytes por ángulo
+    ld de, sin_lookup_table
+    add hl, de ; añadimos offset -> hl con dir a sin(ángulo)
+    ld e, [hl] ; Cuidado, están los DW en little endian, cargar primero e
+    inc hl
+    ld d, [hl]
+    ret
+
 SECTION "Sin Lookup Table", ROM0
 ; Tabla de consulta precomputada para el seno.
 ; Ocupa 2B por entrada * 256 posibles ángulos = 512B ROM -> Optimizable

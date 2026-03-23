@@ -32,7 +32,24 @@
     \subsection{Extra: Presentación del arte}
 
 \section{Implementación y optimizaciones}
-    \subsection{Planteamiento general del objetivo a conseguir}
+    \subsection{Las bases del juego}
+
+    El movimiento del jugador principal está basado en las técnicas trigonométricas modernas de movimiento de los videojuegos actuales.
+    Esto es así, debido a que el personaje debe de poder desplazarse en 8 direcciones: arriba, abajo, izquierda, derecha y las 4 diagonales
+    resultantes de las combinaciones entre estas. 
+
+    El uso de trigonometría permite simplificar la lógica subyacente y por tanto, las líneas de código empleadas para dicho fin, a la vez
+    que permite la posibilidad de calcular trayectorias más complejas para otras entidades como los proyectiles o los enemigos.
+
+    No obstante, su aplicación acarrea una serie de limitaciones y sobrecostes que no pasan de sapercibidos. El más acusante, es la
+    carencia de soporte por parte de la arquitectura para las operaciones de multiplicación y división, y no hablemos ya de soporte
+    para números en coma flotante.
+
+    Dado que realizar los cálculos sería muy costoso, se ha optado por emplear una tabla de búsqueda precalculada con las razones trignométricas
+    del seno, cambiando la escala de los ángulos de 0 a 360 grados a una escala en 1 byte de 0 a 255 posibles valores. Los valores para el seno
+    son del tipo entero de 2 Bytes con coma fija, de tal forma que intermanete se emplean decimales, aunque estos se aproximen en el resultado final.
+    
+
     \subsection{Técnicas comunes para la reducción de memoria ROM}
         \subsubsection{Metaspriting}
         \subsubsection{Sprite tile optimization}

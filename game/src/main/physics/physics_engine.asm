@@ -8,14 +8,14 @@ PE_ANGLE: DB
 SECTION "Physics Engine Functions", ROM0
 ; Dado el ángulo y velocidad de un objeto, devuelve las componentes X e Y de dicha velocidad.
 ;
-; NOTA: vel_y está invertida para funcionar correctamente con la representación en pantalla.
-;
-; IN: B = Angle, C = velocity
+; IN: B (uint Q8) = Angle, C (uint Q8) = velocity
 ; 
-; OUT: BC = Q12.4 vel_y, DE = Q12.4 vel_x
+; OUT: BC (signed Q12.4) = vel_y, DE (signed Q12.4) = vel_x
+;
+; DESTRUYE: Todas las variables 
+;
+; NOTA: vel_y está invertida para funcionar correctamente con la representación en pantalla.
 PhysicsEngine_computeVelocity::
-    ; TODO: Multiplicar por la velocidad
-
     ; Almacenamos ángulo y velocidad
     ld a, b
     ld [PE_ANGLE], a
@@ -38,6 +38,62 @@ PhysicsEngine_computeVelocity::
     ld a, [PE_ANGLE]
     add a, 64 ; offset para coseno empleando tabla seno
     call sinOfAinDE ; DE = vel_x
+
+    ; Tratamos la velocidad como un sumando a los ejes y no como un multiplicador
+    ; Tener cuidado con el signo: a un valor negativo, le corresponde un incremento negativo de la velocidad
+
+    ; Eje X
+    ; Comprobar si es negativo y añadir velocidad
+    ld a, [PE_VEL] 
+
+    bit 3, d
+    jr z, .positive_x
+
+    cpl
+    inc a
+
+.positive_x:
+    add a, e
+    ld e, a
+    ld a, d
+    adc a, 0
+    ld d, a
+
+
+    ; Eje Y
+    ld a, [PE_VEL] 
+
+    bit 3, b
+    jr z, .positive_y
+
+    cpl
+    inc a
+
+.positive_y:
+    add a, c
+    ld c, a
+    ld a, b
+    adc a, 0
+    ld b, a
+
+    ; Escalar velocidades
+    srl b
+    rr c
+    srl b
+    rr c
+    srl b
+    rr c
+    srl b
+    rr c
+
+    srl d
+    rr e
+    srl d
+    rr e
+    srl d
+    rr e
+    srl d
+    rr e
 
     ret 
 

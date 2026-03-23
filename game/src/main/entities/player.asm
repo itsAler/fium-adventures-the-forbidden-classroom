@@ -8,9 +8,6 @@ PLAYER_ANGLE::      DB
 PLAYER_POS_X::      DW   ;Q12.4 (litte endian)
 PLAYER_POS_Y::      DW   ;Q12.4 (litte endian)
 PLAYER_HEALTH::     DB
-PLAYER_DAMAGE::     DB
-PLAYER_SHOT_FREC::  DB
-PLAYER_SHOT_VEL::   DB
 
 SECTION "Graphics", ROM0
 playerTiles: INCBIN "src/generated/sprites/player.2bpp"
@@ -148,27 +145,6 @@ Player_update_logic::
     ld a, [PLAYER_VEL]
     ld c, a
     call PhysicsEngine_computeVelocity
-
-    ; Escalar velocidades para movimiento suave, ya que 
-    ; la tabla de seno y coseno tiene valores muy grandes
-    ; para los Q12.4 que usa RenderMetasprite
-    srl b
-    rr c
-    srl b
-    rr c
-    srl b
-    rr c
-    srl b
-    rr c
-
-    srl d
-    rr e
-    srl d
-    rr e
-    srl d
-    rr e
-    srl d
-    rr e
 
     jr .applyMovement
 
