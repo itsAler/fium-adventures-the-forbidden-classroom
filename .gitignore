@@ -3,21 +3,21 @@
 *.2bpp
 *.tilemap
 
-
-# Latex rules
-docs/_minted
-docs/main.aux
-docs/main.bbl
-docs/main.bcf
-docs/main.blg
-docs/main.fdb_latexmk
-docs/main.fls
-docs/main.log
-docs/main.out
-docs/main.pdf
-docs/main.run.xml
-docs/main.synctex.gz
-docs/main.toc
-docs/main.bbl-SAVE-ERROR
-docs/main.BCF-SAVE-ERROR
-docs/main.listing
+# LATEX
+**/latex/_minted
+**/latex/main.aux
+**/latex/main.bbl
+**/latex/main.bcf
+**/latex/main.blg
+**/latex/main.fdb_latexmk
+**/latex/main.fls
+**/latex/main.log
+**/latex/main.out
+**/latex/main.pdf
+**/latex/main.run.xml
+**/latex/main.synctex.gz
+**/latex/main.toc
+**/latex/main.bbl-SAVE-ERROR
+**/latex/main.bcf-SAVE-ERROR
+**/latex/main.listing
+**/latex/main.pyg
