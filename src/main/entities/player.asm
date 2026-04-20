@@ -31,6 +31,8 @@ Player_init::
     ; Inicializamos los atributos del jugador
     xor a
 
+    ld [PLAYER_VEL], a
+
     ld [PLAYER_POS_X], a
     ld [PLAYER_POS_X + 1], a
 
@@ -149,7 +151,6 @@ Player_update_logic::
     jr .applyMovement
 
 .noInputPhysics:
-    ; Sin input, vel=0
     xor a
     ld b, a
     ld c, a
@@ -157,7 +158,6 @@ Player_update_logic::
     ld e, a
 
 .applyMovement:
-    ; $0A09
     ; Calcular nueva posición:
     ; pos_y = pos_y + vel_y
     ld a, [PLAYER_POS_Y + 1]
@@ -201,8 +201,8 @@ Player_update_logic::
     ld e, a
     
 	ld hl, PlayerMetasprite
-	call RenderMetasprite
+	jp RenderMetasprite
     
-    ret
+    ;ret
 
 
