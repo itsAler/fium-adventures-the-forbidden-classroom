@@ -3,10 +3,10 @@ INCLUDE "src/main/utils/hardware.inc"
 
 SECTION "GameplayBackgroundSection", ROM0
 
-spawnMap: INCBIN "src/generated/backgrounds/spawn.tilemap"
+spawnMap: INCBIN "src/generated/backgrounds/prueba.tilemap"
 spawnMapEnd:
  
-spawnTileData: INCBIN "src/generated/backgrounds/spawn.2bpp"
+spawnTileData: INCBIN "src/generated/backgrounds/prueba.2bpp"
 spawnTileDataEnd:
 
 InitializeBackground::

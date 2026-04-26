@@ -15,7 +15,7 @@ playerTilesEnd:
 
 PlayerMetasprite::
   db 16, 8, 0, 0
-  db 12, 16, 0, 0
+  db 24, 8, 1, 0
   db 128 ; Metasprite end
 
 
@@ -46,8 +46,6 @@ Player_init::
     ld [PLAYER_ANGLE], a
 
     ret
-
-
 
 ; Encargado de actualizar y llamar a las rutinas para
 ; el movimiento, las colisiones, los disparos y el
@@ -160,33 +158,32 @@ Player_update_logic::
 .applyMovement:
     ; Calcular nueva posición:
     ; pos_y = pos_y + vel_y
-    ld a, [PLAYER_POS_Y + 1]
+    ld a, [rSCY + 1]
     ld h, a
-    ld a, [PLAYER_POS_Y]
+    ld a, [rSCY]
     ld l, a
 
     add hl, bc
 
     ; guardamos pos_y
     ld a, h
-    ld [PLAYER_POS_Y + 1], a
+    ld [rSCY + 1], a
     ld a, l
-    ld [PLAYER_POS_Y], a
+    ld [rSCY], a
     
     ; pos_x = pos_x + vel_x
-    ld a, [PLAYER_POS_X + 1]
+    ld a, [rSCX + 1]
     ld h, a
-    ld a, [PLAYER_POS_X]
+    ld a, [rSCX]
     ld l, a
     
     add hl, de
 
     ld a, h
-    ld [PLAYER_POS_X + 1], a
+    ld [rSCX + 1], a
     ld a, l
-    ld [PLAYER_POS_X], a
+    ld [rSCX], a
     
-    ; TODO:
     call PhysicsEngine_check_collision
 
     ; Renderizamos el metasprite

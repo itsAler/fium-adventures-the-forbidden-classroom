@@ -45,13 +45,13 @@ OBJS = $(patsubst %.asm,$(OBJDIR)/%.o,$(notdir $(ASMSOURCES_COLLECTED)))
 all: $(BINS)
 # ANCHOR: generate-graphics
 NEEDED_GRAPHICS = \
-	$(GENBACKGROUNDS)/spawn.2bpp \
-	$(GENBACKGROUNDS)/spawn.tilemap \
+	$(GENBACKGROUNDS)/prueba.2bpp \
+	$(GENBACKGROUNDS)/prueba.tilemap \
 	$(GENSPRITES)/player.2bpp
 
 # Generate sprites, ensuring the containing directories have been created.
 $(GENSPRITES)/%.2bpp: $(RESSPRITES)/%.png | $(GENSPRITES)
-	$(GFX) --columns -o $@ $< 
+	$(GFX) -o $@ $< 
 
 # Generate background tile set, ensuring the containing directories have been created.
 $(GENBACKGROUNDS)/%.2bpp: $(RESBACKGROUNDS)/%.png | $(GENBACKGROUNDS)

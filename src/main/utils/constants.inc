@@ -12,10 +12,9 @@ DEF ANGLE_315DEG    EQU 224
 DEF ANGLE_NULL      EQU 255 ; Empleado por player para indicar que no hay input
 
 ; Player 
-DEF PLAYER_INIT_VEL_MAX EQU 3
 DEF PLAYER_INIT_HEALTH  EQU 20
 DEF PLAYER_INIT_DAMAGE  EQU 5
-DEF PLAYER_INIT_VEL_INC EQU 10
+DEF PLAYER_VEL          EQU 10
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

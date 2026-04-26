@@ -31,6 +31,7 @@ EntryPoint:
 
 	ld a, %11100100
 	ld [rBGP], a
+	ld a, %11100100
 	ld [rOBP0], a
 
 	call InitGameplayState
