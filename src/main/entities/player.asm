@@ -140,10 +140,6 @@ Player_update_logic::
     ld a, b
     ld [PLAYER_ANGLE], a
 
-    ; Comprobar si hay input
-    cp ANGLE_NULL
-    jr z, .noInputPhysics
-
     ; Computar velocidad
     ld a, [PLAYER_VEL]
     ld c, a
@@ -151,43 +147,40 @@ Player_update_logic::
 
     jr .applyMovement
 
-.noInputPhysics:
-    xor a
-    ld b, a
-    ld c, a
-    ld d, a
-    ld e, a
-
 .applyMovement:
     ; Calcular nueva posición:
     ; pos_y = pos_y + vel_y
-    ld a, [rSCY + 1]
+    ld a, [VIEWPORT_POS_Y + 1]
     ld h, a
-    ld a, [rSCY]
+    ld a, [VIEWPORT_POS_Y]
     ld l, a
 
     add hl, bc
 
     ; guardamos pos_y
     ld a, h
-    ld [rSCY + 1], a
+    ld [VIEWPORT_POS_Y + 1], a
     ld a, l
-    ld [rSCY], a
+    ld [VIEWPORT_POS_Y], a
     
     ; pos_x = pos_x + vel_x
-    ld a, [rSCX + 1]
+    ld a, [VIEWPORT_POS_X + 1]
     ld h, a
-    ld a, [rSCX]
+    ld a, [VIEWPORT_POS_X]
     ld l, a
     
     add hl, de
 
     ld a, h
-    ld [rSCX + 1], a
+    ld [VIEWPORT_POS_X + 1], a
     ld a, l
-    ld [rSCX], a
+    ld [VIEWPORT_POS_X], a
     
-    call PhysicsEngine_check_collision
+    ; Desplazamos viewport escalado
+    ld a, [VIEWPORT_POS_Y + 1]
+    ld [rSCY], a
+    ld a, [VIEWPORT_POS_X + 1]
+    ld [rSCX], a
 
     ; Renderizamos el metasprite
     ld a, [PLAYER_POS_Y + 1]
