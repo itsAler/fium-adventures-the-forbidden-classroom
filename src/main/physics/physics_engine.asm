@@ -10,7 +10,7 @@ SECTION "Physics Engine Functions", ROM0
 ;
 ; IN: B (uint Q8) = Angle, C (uint Q8) = velocity
 ; 
-; OUT: BC (signed Q12.4) = vel_y, DE (signed Q12.4) = vel_x
+; OUT: BC (signed Q10.6) = vel_y, DE (signed Q10.6) = vel_x
 ;
 ; DESTRUYE: Todas las variables 
 ;
@@ -85,7 +85,15 @@ PhysicsEngine_computeVelocity::
     rr c
     srl b
     rr c
+    srl b
+    rr c
+    srl b
+    rr c
 
+    srl d
+    rr e
+    srl d
+    rr e
     srl d
     rr e
     srl d

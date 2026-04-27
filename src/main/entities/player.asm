@@ -9,6 +9,9 @@ PLAYER_POS_X::      DW   ;Q12.4 (litte endian)
 PLAYER_POS_Y::      DW   ;Q12.4 (litte endian)
 PLAYER_HEALTH::     DB
 
+VIEWPORT_POS_X::    DW   ;Q12.4 (litte endian)
+VIEWPORT_POS_Y::    DW   ;Q12.4 (litte endian)
+
 SECTION "Graphics", ROM0
 playerTiles: INCBIN "src/generated/sprites/player.2bpp"
 playerTilesEnd:
@@ -29,21 +32,21 @@ Player_init::
     call CopyDEintoMemoryAtHL
 
     ; Inicializamos los atributos del jugador
-    xor a
-
-    ld [PLAYER_VEL], a
-
+    ld a, LOW(75<<4)
     ld [PLAYER_POS_X], a
+    ld a, HIGH(75<<4)
     ld [PLAYER_POS_X + 1], a
 
+    ld a, LOW(53<<4)
     ld [PLAYER_POS_Y], a
+    ld a, HIGH(53<<4)
     ld [PLAYER_POS_Y + 1], a
-
-    ld a, PLAYER_INIT_VEL_MAX
-    ld [PLAYER_VEL_MAX], a
 
     ld a, ANGLE_NULL
     ld [PLAYER_ANGLE], a
+
+    ld a, 1
+    ld [PLAYER_VEL], a
 
     ret
 
