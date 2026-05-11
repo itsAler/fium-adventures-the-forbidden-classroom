@@ -12,7 +12,7 @@ SECTION "Physics Engine Functions", ROM0
 ;
 ; IN: B (uint Q8) = Angle, C (uint Q8) = velocity
 ; 
-; OUT: B (signed Q8) = vel_y, C (signed Q8) = vel_x
+; OUT: BC (signed Q16) = vel_y, DE (signed Q16) = vel_x
 ;
 ; DESTRUYE: Todas las variables 
 ;

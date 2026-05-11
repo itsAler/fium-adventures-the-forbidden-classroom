@@ -4,8 +4,8 @@ INCLUDE "src/main/utils/constants.inc"
 SECTION "Player Variables", WRAM0
 PLAYER_VEL::        DB
 PLAYER_ANGLE::      DB
-PLAYER_POS_X::      DW   ;Q12.4 (litte endian)
-PLAYER_POS_Y::      DW   ;Q12.4 (litte endian)
+ESCALED_SCX::       DW   ;Q12.4 (litte endian)
+ESCALED_SCY::       DW   ;Q12.4 (litte endian)
 PLAYER_HEALTH::     DB
 
 SECTION "Graphics", ROM0
@@ -152,13 +152,26 @@ Player_update_logic::
 
 .applyMovement:
     ; Calcular nueva posición:
-    ; pos_y = pos_y + vel_y
-    ld a, [rSCY + 1]
+    ; escaled_scy = esc_scy + vel_y
+    ld a, [ESCALED_SCY + 1]
     ld h, a
-    ld a, [rSCY]
+    ld a, [ESCALED_SCY]
     ld l, a
 
     add hl, bc
+    ; Escalar y volcar en SCY
+    sra h
+    rr l
+    sra h
+    rr l
+    sra h
+    rr l
+    sra h
+    rr l
+
+    ld a, l
+    ld [rSCY], a
+
 
     ; guardamos pos_y
     ld a, h
@@ -182,15 +195,11 @@ Player_update_logic::
     call PhysicsEngine_check_collision
 
     ; Renderizamos el metasprite
-    ld a, [PLAYER_POS_Y + 1]
-    ld b, a
-    ld a, [PLAYER_POS_Y]
-    ld c, a
+    ld b, HIGH(64<<4)
+    ld c, LOW(64<<4)
 
-    ld a, [PLAYER_POS_X + 1]
-    ld d, a
-    ld a, [PLAYER_POS_X]
-    ld e, a
+    ld d, HIGH(74<<4)
+    ld e, LOW(74<<4)
     
 	ld hl, PlayerMetasprite
 	jp RenderMetasprite
