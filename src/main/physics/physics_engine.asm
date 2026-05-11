@@ -12,7 +12,7 @@ SECTION "Physics Engine Functions", ROM0
 ;
 ; IN: B (uint Q8) = Angle, C (uint Q8) = velocity
 ; 
-; OUT: BC (signed Q12.4) = vel_y, DE (signed Q12.4) = vel_x
+; OUT: B (signed Q8) = vel_y, C (signed Q8) = vel_x
 ;
 ; DESTRUYE: Todas las variables 
 ;
@@ -38,7 +38,7 @@ PhysicsEngine_computeVelocity::
     call sinOfAinDE ; DE = vel_x
 
     ; Escalar velocidades
-ld a, 7
+    ld a, 6
 .loop:
     sra b
     rr c

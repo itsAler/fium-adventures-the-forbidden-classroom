@@ -32,11 +32,15 @@ Player_init::
 
     ld [PLAYER_VEL], a
 
+    ld a, LOW(74<<4)
+    ld [PLAYER_POS_X], a 
+    ld a, HIGH(74<<4)
     ld [PLAYER_POS_X + 1], a
-    ld [PLAYER_POS_Y + 1], a
 
-    ld [PLAYER_POS_X], a
+    ld a, LOW(64<<4)
     ld [PLAYER_POS_Y], a
+    ld a, HIGH(64<<4)
+    ld [PLAYER_POS_Y + 1], a
 
     ld a, ANGLE_NULL
     ld [PLAYER_ANGLE], a
