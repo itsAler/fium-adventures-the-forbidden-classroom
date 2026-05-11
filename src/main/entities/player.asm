@@ -49,9 +49,9 @@ Player_init::
 Player_update_logic::
     ; Obtener ángulo de movimiento
     ld a, [wCurKeys]
+    ld d, a
 
     ; ---- RIGHT + UP ----
-    ld d, a
     and PADF_RIGHT | PADF_UP
     cp PADF_RIGHT | PADF_UP
     jr z, .angle45
@@ -135,8 +135,6 @@ Player_update_logic::
     jr z, .noInputPhysics
 
     ; Computar velocidad
-    ld a, [PLAYER_VEL]
-    ld c, a
     call PhysicsEngine_computeVelocity
 
     jr .applyMovement

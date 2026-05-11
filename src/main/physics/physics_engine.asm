@@ -24,15 +24,15 @@ PhysicsEngine_computeVelocity::
     ld a, c
     ld [PE_VEL], a
 
-    ; vel_y = -sin(angle) = sin(angle + 180)
+    ; vel_y = -sin(angle) = sin(angle + 180º)
     ld a, b
     add a, 128
     call sinOfAinDE
 
     ld b, d
-    ld c, e ; BC = vel_y
+    ld c, e ; BC = -vel_y
 
-    ; vel_x = cos(angle)
+    ; vel_x = cos(angle) = sin(angle + 90º)
     ld a, [PE_ANGLE]
     add a, 64 ; offset para coseno empleando tabla seno
     call sinOfAinDE ; DE = vel_x
@@ -40,17 +40,15 @@ PhysicsEngine_computeVelocity::
     ; Escalar velocidades
 ld a, 7
 .loop:
-    srl b
+    sra b
     rr c
 
-    srl d
+    sra d
     rr e
 
     dec a
     cp a, 0
     jr nz, .loop
-
-    
 
     ret 
 

@@ -23,6 +23,15 @@ InitGameplayState::
 	dec b
 	jr nz, .resetOAM
 
+	; Reset shadowOAM
+	xor a
+	ld b, 160
+	ld hl, wShadowOAM
+.resetShadowOAM
+	ld [hli], a
+	dec b
+	jr nz, .resetShadowOAM
+
 	; Reset window and scroll.
 	xor a
 	ld [rWY], a
