@@ -3,14 +3,10 @@ INCLUDE "src/main/utils/constants.inc"
 
 SECTION "Player Variables", WRAM0
 PLAYER_VEL::        DB
-PLAYER_VEL_MAX::    DB
 PLAYER_ANGLE::      DB
 PLAYER_POS_X::      DW   ;Q12.4 (litte endian)
 PLAYER_POS_Y::      DW   ;Q12.4 (litte endian)
 PLAYER_HEALTH::     DB
-
-VIEWPORT_POS_X::    DW   ;Q12.4 (litte endian)
-VIEWPORT_POS_Y::    DW   ;Q12.4 (litte endian)
 
 SECTION "Graphics", ROM0
 playerTiles: INCBIN "src/generated/sprites/player.2bpp"
@@ -32,21 +28,18 @@ Player_init::
     call CopyDEintoMemoryAtHL
 
     ; Inicializamos los atributos del jugador
-    ld a, LOW(75<<4)
-    ld [PLAYER_POS_X], a
-    ld a, HIGH(75<<4)
-    ld [PLAYER_POS_X + 1], a
+    xor a
 
-    ld a, LOW(53<<4)
-    ld [PLAYER_POS_Y], a
-    ld a, HIGH(53<<4)
+    ld [PLAYER_VEL], a
+
+    ld [PLAYER_POS_X + 1], a
     ld [PLAYER_POS_Y + 1], a
+
+    ld [PLAYER_POS_X], a
+    ld [PLAYER_POS_Y], a
 
     ld a, ANGLE_NULL
     ld [PLAYER_ANGLE], a
-
-    ld a, 1
-    ld [PLAYER_VEL], a
 
     ret
 
@@ -56,9 +49,6 @@ Player_init::
 Player_update_logic::
     ; Obtener ángulo de movimiento
     ld a, [wCurKeys]
-
-    ;DEBUG, FORZAMOS MOVIMIENTO DER
-    ;ld a, PADF_RIGHT
 
     ; ---- RIGHT + UP ----
     ld d, a
@@ -140,6 +130,10 @@ Player_update_logic::
     ld a, b
     ld [PLAYER_ANGLE], a
 
+    ; Comprobar si hay input
+    cp ANGLE_NULL
+    jr z, .noInputPhysics
+
     ; Computar velocidad
     ld a, [PLAYER_VEL]
     ld c, a
@@ -147,40 +141,43 @@ Player_update_logic::
 
     jr .applyMovement
 
+.noInputPhysics:
+    xor a
+    ld b, a
+    ld c, a
+    ld d, a
+    ld e, a
+
 .applyMovement:
     ; Calcular nueva posición:
     ; pos_y = pos_y + vel_y
-    ld a, [VIEWPORT_POS_Y + 1]
+    ld a, [rSCY + 1]
     ld h, a
-    ld a, [VIEWPORT_POS_Y]
+    ld a, [rSCY]
     ld l, a
 
     add hl, bc
 
     ; guardamos pos_y
     ld a, h
-    ld [VIEWPORT_POS_Y + 1], a
+    ld [rSCY + 1], a
     ld a, l
-    ld [VIEWPORT_POS_Y], a
+    ld [rSCY], a
     
     ; pos_x = pos_x + vel_x
-    ld a, [VIEWPORT_POS_X + 1]
+    ld a, [rSCX + 1]
     ld h, a
-    ld a, [VIEWPORT_POS_X]
+    ld a, [rSCX]
     ld l, a
     
     add hl, de
 
     ld a, h
-    ld [VIEWPORT_POS_X + 1], a
+    ld [rSCX + 1], a
     ld a, l
-    ld [VIEWPORT_POS_X], a
-    
-    ; Desplazamos viewport escalado
-    ld a, [VIEWPORT_POS_Y + 1]
-    ld [rSCY], a
-    ld a, [VIEWPORT_POS_X + 1]
     ld [rSCX], a
+    
+    call PhysicsEngine_check_collision
 
     ; Renderizamos el metasprite
     ld a, [PLAYER_POS_Y + 1]
