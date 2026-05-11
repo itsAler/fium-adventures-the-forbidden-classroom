@@ -6,7 +6,7 @@ SECTION "Trigonometry Functions", ROM0
 ;
 ; OUT: DE (signed Q16) = sen(angulo) [-256, 256].
 ;
-; Destruye: hl, de
+; Destruye: hl
 sinOfAinDE::
     ld l, a
     ld h, 0

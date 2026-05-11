@@ -18,18 +18,6 @@ SECTION "Physics Engine Functions", ROM0
 ;
 ; NOTA: vel_y está invertida para funcionar correctamente con la representación en pantalla.
 PhysicsEngine_computeVelocity::
-    ; Si el ángulo es null, no hay movimiento
-    ld a, b
-    cp ANGLE_NULL
-    jr nz, .notNull
-    xor a
-    ld b, a
-    ld c, a
-    ld d, a
-    ld e, a
-    ret
-
-.notNull:
     ; Almacenamos ángulo y velocidad
     ld a, b
     ld [PE_ANGLE], a
@@ -38,7 +26,7 @@ PhysicsEngine_computeVelocity::
 
     ; vel_y = -sin(angle) = sin(angle + 180)
     ld a, b
-    add a, 180
+    add a, 128
     call sinOfAinDE
 
     ld b, d
@@ -50,27 +38,21 @@ PhysicsEngine_computeVelocity::
     call sinOfAinDE ; DE = vel_x
 
     ; Escalar velocidades
-    srl b
-    rr c
-    srl b
-    rr c
-    srl b
-    rr c
+ld a, 7
+.loop:
     srl b
     rr c
 
     srl d
     rr e
-    srl d
-    rr e
-    srl d
-    rr e
-    srl d
-    rr e
+
+    dec a
+    cp a, 0
+    jr nz, .loop
+
+    
 
     ret 
-
-
 
 PhysicsEngine_check_collision::
     ; TODO

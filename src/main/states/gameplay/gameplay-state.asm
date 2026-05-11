@@ -11,7 +11,6 @@ wBackgroundScroll_Y_real:: db
 SECTION "GameplayState", ROM0
 InitGameplayState::
 	call InitializeBackground
-	call EntityManager_init
 	call InitSprObjLib
 	call Player_init
 
@@ -40,9 +39,7 @@ InitGameplayState::
 	ld [rLCDC], a
 
     ret
-
-
-
+	
 UpdateGameplayState::
 	call ResetShadowOAM
     call UpdateInputKeys 
