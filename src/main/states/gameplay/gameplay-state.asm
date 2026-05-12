@@ -53,14 +53,6 @@ UpdateGameplayState::
 	call ResetShadowOAM
     call UpdateInputKeys 
 	call Player_update_logic
-
-
-	ld a, 127
-	ld b, 36
-	call divideAbyB
-	ld a, 5
-	ld b, 8
-	call divideAbyB
 	
 	call WaitForOneVBlankFunction
 	ld a, HIGH(wShadowOAM)

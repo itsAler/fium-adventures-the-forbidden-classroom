@@ -1,5 +1,9 @@
 include "src/main/utils/hardware.inc"
 
+; Bool
+DEF TRUE            EQU 1
+DEF FALSE           EQU 0
+
 ; Trigonometry
 DEF ANGLE_0DEG      EQU 0
 DEF ANGLE_45DEG     EQU 32
@@ -14,6 +18,8 @@ DEF ANGLE_NULL      EQU 255 ; Empleado por player para indicar que no hay input
 ; Player 
 DEF PLAYER_INIT_HEALTH  EQU 20
 DEF PLAYER_INIT_DAMAGE  EQU 5
+DEF PLAYER_POS_Y    EQU 64
+DEF PLAYER_POS_X    EQU 74
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

@@ -42,9 +42,34 @@ PhysicsEngine_computeVelocity::
 
 ; Necesitamos las nuevas coordenadas del jugador y el ángulo de movimiento.
 ; Devolvemos en A si el movimiento es válido en el eje x y en el eje y
+
+; IN: B (uint8) = new SCY, C (uint8) = new SCX
+;
+; OUT: A (bit 0) = yValid, A (bit 1) = xValid
+;
+; DESTRUYE: 
 PhysicsEngine_check_collision::
-    ; TODO
-    ;Las coordenadas de la esquina superior izquierda del jugador (x, y) = ((scy + player.y), (scx + player.x))
+    ;Obtener las coordenadas de la esquina superior izquierda del jugador (x, y) = ((scy + player.y), (scx + player.x))
+    
+    ; b = player_y__inBG
+    ld a, PLAYER_POS_Y
+    add a, b
+    ld b, a
+
+    ; d = player_x_inBG
+    ld a, PLAYER_POS_X
+    add a, c
+    ld d, a
+
+    ; Obtener bloque en el tilemap
+
+    ld a, b
+    ld b, 8 ; El tamaño de los bloques es de 8x8 px
+    divideAbyB
+    ld e, c ; e = bloque.y
+
+    ld a, d
+    divideAbyB
 
     ret
 

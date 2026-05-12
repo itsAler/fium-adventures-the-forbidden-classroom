@@ -1,9 +1,6 @@
 INCLUDE "src/main/utils/hardware.inc"
 INCLUDE "src/main/utils/constants.inc"
 
-DEF PLAYER_POS_Y    EQU 64
-DEF PLAYER_POS_X    EQU 74
-
 SECTION "Player Variables", WRAM0
 PLAYER_VEL::        DB
 ESCALED_SCX::       DW   ;Q12.4 (litte endian)
