@@ -32,16 +32,6 @@ Player_init::
 
     ld [PLAYER_VEL], a
 
-    ld a, LOW(74<<4)
-    ld [PLAYER_POS_X], a 
-    ld a, HIGH(74<<4)
-    ld [PLAYER_POS_X + 1], a
-
-    ld a, LOW(64<<4)
-    ld [PLAYER_POS_Y], a
-    ld a, HIGH(64<<4)
-    ld [PLAYER_POS_Y + 1], a
-
     ld a, ANGLE_NULL
     ld [PLAYER_ANGLE], a
 
@@ -159,36 +149,50 @@ Player_update_logic::
     ld l, a
 
     add hl, bc
-    ; Escalar y volcar en SCY
-    sra h
-    rr l
-    sra h
-    rr l
-    sra h
-    rr l
-    sra h
-    rr l
-
-    ld a, l
-    ld [rSCY], a
-
-
-    ; guardamos pos_y
-    ld a, h
-    ld [rSCY + 1], a
-    ld a, l
-    ld [rSCY], a
     
-    ; pos_x = pos_x + vel_x
-    ld a, [rSCX + 1]
+    ; Guardar
+    ld a, h
+    ld [ESCALED_SCY + 1], a
+    ld a, l
+    ld [ESCALED_SCY], a
+
+    ; Escalar
+    sra h
+    rr l
+    sra h
+    rr l
+    sra h
+    rr l
+    sra h
+    rr l
+    ; Volcar en SCY
+    ld a, l
+    ld [rSCY], a
+
+    ; escaled_scx
+    ld a, [ESCALED_SCX + 1]
     ld h, a
-    ld a, [rSCX]
+    ld a, [ESCALED_SCX]
     ld l, a
-    
-    add hl, de
 
+    add hl, de
+    
+    ; Guardar
     ld a, h
-    ld [rSCX + 1], a
+    ld [ESCALED_SCX + 1], a
+    ld a, l
+    ld [ESCALED_SCX], a
+
+    ; Escalar
+    sra h
+    rr l
+    sra h
+    rr l
+    sra h
+    rr l
+    sra h
+    rr l
+    ; Volcar en SCX
     ld a, l
     ld [rSCX], a
     
