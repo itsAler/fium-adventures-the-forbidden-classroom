@@ -2,6 +2,7 @@
 *.o
 *.2bpp
 *.tilemap
+*.sym
 
 # LATEX
 **/latex/_minted

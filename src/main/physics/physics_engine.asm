@@ -6,7 +6,7 @@ INCLUDE "src/main/utils/constants.inc"
 SECTION "Physics Engine Functions", ROM0
 ; Dado el ángulo y velocidad de un objeto, devuelve las componentes X e Y de dicha velocidad.
 ;
-; IN: A(B) (uint Q8) = Angle
+; IN: A (uint Q8) = Angle
 ; 
 ; OUT: BC (signed Q16) = vel_y, DE (signed Q16) = vel_x
 ;
@@ -40,8 +40,11 @@ PhysicsEngine_computeVelocity::
 
     ret 
 
-; IN: Las coordenadas de la esquina superior izquierda del jugador (x, y) = ((scy + player.y), (scx + player.x))
+; Necesitamos las nuevas coordenadas del jugador y el ángulo de movimiento.
+; Devolvemos en A si el movimiento es válido en el eje x y en el eje y
 PhysicsEngine_check_collision::
     ; TODO
+    ;Las coordenadas de la esquina superior izquierda del jugador (x, y) = ((scy + player.y), (scx + player.x))
+
     ret
 

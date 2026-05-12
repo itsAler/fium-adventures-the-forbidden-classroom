@@ -26,6 +26,26 @@ rand::
   ld b, a
   ret
 
+; Divide dos números y obtén el coeficiente
+;
+; IN: A (uint8) = dividendo, B (uint8) = divisor
+;
+; OUT: C (uint8) = cociente, A (uint8) = resto
+;
+; DESTRUYE:
+divideAbyB::
+  ld c, 0
+
+.loop:
+  ; while(A>=B) {a = a - b; c++}
+  cp a, b 
+  ret c
+
+  sub a, b
+  inc c
+
+  jr .loop
+
 ; Multiplica HL por A
 ;
 ; IN:

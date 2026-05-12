@@ -31,9 +31,11 @@ Player_init::
 
     ; Inicializamos los atributos del jugador
     xor a
-
     ld [PLAYER_VEL], a
-
+    ld [ESCALED_SCX], a
+    ld [ESCALED_SCX + 1], a
+    ld [ESCALED_SCY], a
+    ld [ESCALED_SCY + 1], a
     ret
 
 ; Encargado de actualizar y llamar a las rutinas para
