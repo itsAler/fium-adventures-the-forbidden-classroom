@@ -3,14 +3,10 @@
 
 INCLUDE "src/main/utils/constants.inc"
 
-SECTION "Physics Engine Variables", WRAM0
-PE_VEL: DB
-PE_ANGLE: DB
-
 SECTION "Physics Engine Functions", ROM0
 ; Dado el ángulo y velocidad de un objeto, devuelve las componentes X e Y de dicha velocidad.
 ;
-; IN: B (uint Q8) = Angle, C (uint Q8) = velocity
+; IN: A(B) (uint Q8) = Angle
 ; 
 ; OUT: BC (signed Q16) = vel_y, DE (signed Q16) = vel_x
 ;
@@ -18,14 +14,7 @@ SECTION "Physics Engine Functions", ROM0
 ;
 ; NOTA: vel_y está invertida para funcionar correctamente con la representación en pantalla.
 PhysicsEngine_computeVelocity::
-    ; Almacenamos ángulo y velocidad
-    ld a, b
-    ld [PE_ANGLE], a
-    ld a, c
-    ld [PE_VEL], a
-
     ; vel_y = -sin(angle) = sin(angle + 180º)
-    ld a, b
     add a, 128
     call sinOfAinDE
 
@@ -33,25 +22,25 @@ PhysicsEngine_computeVelocity::
     ld c, e ; BC = -vel_y
 
     ; vel_x = cos(angle) = sin(angle + 90º)
-    ld a, [PE_ANGLE]
-    add a, 64 ; offset para coseno empleando tabla seno
+    ; Tenemos que añadir 64 al ángulo base, pero como ya tiene un añadido de 128, hay que restar 128 + 64 = -64
+    ; y nos ahorramos almacenar el ángulo original.
+    sub a, 64
     call sinOfAinDE ; DE = vel_x
 
     ; Escalar velocidades
-    ld a, 6
-.loop:
+    sra b
+    rr c
     sra b
     rr c
 
     sra d
     rr e
-
-    dec a
-    cp a, 0
-    jr nz, .loop
+    sra d
+    rr e
 
     ret 
 
+; IN: Las coordenadas de la esquina superior izquierda del jugador (x, y) = ((scy + player.y), (scx + player.x))
 PhysicsEngine_check_collision::
     ; TODO
     ret

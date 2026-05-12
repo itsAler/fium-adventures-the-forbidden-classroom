@@ -1,9 +1,11 @@
 INCLUDE "src/main/utils/hardware.inc"
 INCLUDE "src/main/utils/constants.inc"
 
+DEF PLAYER_POS_Y    EQU 64
+DEF PLAYER_POS_X    EQU 74
+
 SECTION "Player Variables", WRAM0
 PLAYER_VEL::        DB
-PLAYER_ANGLE::      DB
 ESCALED_SCX::       DW   ;Q12.4 (litte endian)
 ESCALED_SCY::       DW   ;Q12.4 (litte endian)
 PLAYER_HEALTH::     DB
@@ -31,9 +33,6 @@ Player_init::
     xor a
 
     ld [PLAYER_VEL], a
-
-    ld a, ANGLE_NULL
-    ld [PLAYER_ANGLE], a
 
     ret
 
@@ -86,44 +85,41 @@ Player_update_logic::
     jr nz, .angle270
 
     ; ---- Sin input ----
-    ld b, ANGLE_NULL
+    ld a, ANGLE_NULL
     jr .angleDone
 
 .angle0:
-    ld b, ANGLE_0DEG
+    ld a, ANGLE_0DEG
     jr .angleDone
 
 .angle45:
-    ld b, ANGLE_45DEG
+    ld a, ANGLE_45DEG
     jr .angleDone
 
 .angle90:
-    ld b, ANGLE_90DEG
+    ld a, ANGLE_90DEG
     jr .angleDone
 
 .angle135:
-    ld b, ANGLE_135DEG
+    ld a, ANGLE_135DEG
     jr .angleDone
 
 .angle180:
-    ld b, ANGLE_180DEG
+    ld a, ANGLE_180DEG
     jr .angleDone
 
 .angle225:
-    ld b, ANGLE_225DEG
+    ld a, ANGLE_225DEG
     jr .angleDone
 
 .angle270:
-    ld b, ANGLE_270DEG
+    ld a, ANGLE_270DEG
     jr .angleDone
 
 .angle315:
-    ld b, ANGLE_315DEG
+    ld a, ANGLE_315DEG
 
 .angleDone:
-    ld a, b
-    ld [PLAYER_ANGLE], a
-
     ; Comprobar si hay input
     cp ANGLE_NULL
     jr z, .noInputPhysics
@@ -165,6 +161,11 @@ Player_update_logic::
     rr l
     sra h
     rr l
+    sra h
+    rr l
+    sra h
+    rr l
+
     ; Volcar en SCY
     ld a, l
     ld [rSCY], a
@@ -192,6 +193,11 @@ Player_update_logic::
     rr l
     sra h
     rr l
+    sra h
+    rr l
+    sra h
+    rr l
+
     ; Volcar en SCX
     ld a, l
     ld [rSCX], a
@@ -199,11 +205,11 @@ Player_update_logic::
     call PhysicsEngine_check_collision
 
     ; Renderizamos el metasprite
-    ld b, HIGH(64<<4)
-    ld c, LOW(64<<4)
+    ld b, HIGH(PLAYER_POS_Y<<4)
+    ld c, LOW(PLAYER_POS_Y<<4)
 
-    ld d, HIGH(74<<4)
-    ld e, LOW(74<<4)
+    ld d, HIGH(PLAYER_POS_X<<4)
+    ld e, LOW(PLAYER_POS_X<<4)
     
 	ld hl, PlayerMetasprite
 	jp RenderMetasprite
